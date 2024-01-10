@@ -1,13 +1,10 @@
 import re
+import Util.input
 
-input_lines = []
-with open('input.txt', 'r') as input_file:
-	for line in input_file:
-		input_lines.append(line)
-total_lines = len(input_lines)
-line_length = len(input_lines[0])
+def getInput(filename):
+	return Util.input.LoadInput(Util.input.GetInputFile(__file__, filename))
 
-def isAdjacentSymbol(line, col, length):
+def _isAdjacentSymbol(input_lines, line, col, length, total_lines, line_length):
 	start_line = max(line - 1, 0)
 	end_line = min(line + 1, total_lines - 1)
 	start_col = max(col - 1, 0)
@@ -18,7 +15,7 @@ def isAdjacentSymbol(line, col, length):
 				return True
 	return False
 
-def AdjacentGearPosition(line, col, length):
+def _getAdjacentGearPosition(input_lines, line, col, length, total_lines, line_length):
 	start_line = max(line - 1, 0)
 	end_line = min(line + 1, total_lines - 1)
 	start_col = max(col - 1, 0)
@@ -30,34 +27,37 @@ def AdjacentGearPosition(line, col, length):
 	return None
 
 # Silver star
-parts_sum = 0
-all_matching = []
-for i, line in enumerate(input_lines):
-	matches = re.finditer('\\d+', line)
-	for match in matches:
-		if isAdjacentSymbol(i, match.start(), len(match[0])):
-			all_matching.append(int(match[0]))
-			#print(match)
-			parts_sum += int(match[0])
-
-print('Silver answer: ' + str(parts_sum))
+def silver(input_lines):
+	total_lines = len(input_lines)
+	line_length = len(input_lines[0])
+	parts_sum = 0
+	all_matching = []
+	for i, line in enumerate(input_lines):
+		matches = re.finditer('\\d+', line)
+		for match in matches:
+			if _isAdjacentSymbol(input_lines, i, match.start(), len(match[0]), total_lines, line_length):
+				all_matching.append(int(match[0]))
+				parts_sum += int(match[0])
+	return parts_sum
 
 # Gold star
-gear_ratio_sum = 0
-gear_candidates = {}
-for i, line in enumerate(input_lines):
-	matches = re.finditer('\\d+', line)
-	for match in matches:
-		position = AdjacentGearPosition(i, match.start(), len(match[0]))
-		if position:
-			if position in gear_candidates:
-				gear_candidates[position].append(int(match[0]))
-			else:
-				gear_candidates[position] = [int(match[0])]
+def gold(input_lines):
+	total_lines = len(input_lines)
+	line_length = len(input_lines[0])
+	gear_ratio_sum = 0
+	gear_candidates = {}
+	for i, line in enumerate(input_lines):
+		matches = re.finditer('\\d+', line)
+		for match in matches:
+			position = _getAdjacentGearPosition(input_lines, i, match.start(), len(match[0]), total_lines, line_length)
+			if position:
+				if position in gear_candidates:
+					gear_candidates[position].append(int(match[0]))
+				else:
+					gear_candidates[position] = [int(match[0])]
 
+	for gear_position in gear_candidates:
+		if len(gear_candidates[gear_position]) == 2:
+			gear_ratio_sum += (gear_candidates[gear_position][0] * gear_candidates[gear_position][1])
 
-for gear_position in gear_candidates:
-	if len(gear_candidates[gear_position]) == 2:
-		gear_ratio_sum += (gear_candidates[gear_position][0] * gear_candidates[gear_position][1])
-
-print('Gold answer: ' + str(gear_ratio_sum))
+	return gear_ratio_sum
