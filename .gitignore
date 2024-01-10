@@ -3,3 +3,5 @@ input_sample.txt
 input_sample_1.txt
 input_sample_2.txt
 input_gold.txt
+*.sublime-workspace
+__pycache__
