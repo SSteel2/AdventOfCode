@@ -4,7 +4,6 @@ import Util.input
 def getInput(filename):
 	return Util.input.LoadInput(Util.input.GetInputFile(__file__, filename))
 
-# Silver star
 def silver(input_lines):
 	numbers_sum = 0
 	for line in input_lines:
@@ -18,7 +17,6 @@ def silver(input_lines):
 		numbers_sum += int(first_digit + last_digit)
 	return numbers_sum
 
-# Gold star
 numbers_dict = {
 	'one': '1',
 	'two': '2',

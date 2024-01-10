@@ -1,9 +1,9 @@
-input_lines = []
-with open('input.txt', 'r') as input_file:
-	for line in input_file:
-		input_lines.append(line)
+import Util.input
 
-def ParseInputLine(line):
+def getInput(filename):
+	return Util.input.LoadInput(Util.input.GetInputFile(__file__, filename))
+
+def _parseLine(line):
 	split1 = line.split(': ')
 	card_id = int(split1[0].split(' ')[-1])
 	split2 = split1[1].split(' | ')
@@ -11,34 +11,31 @@ def ParseInputLine(line):
 	selected_numbers = [int(i) for i in split2[1].split(' ') if i != '']
 	return {'card': card_id, 'winning': winning_numbers, 'selected': selected_numbers}
 
-parsed = []
-for line in input_lines:
-	parsed.append(ParseInputLine(line))
+def silver(input_lines):
+	parsed = Util.input.ParseInputLines(input_lines, _parseLine)
+	ticket_sum = 0
+	for ticket in parsed:
+		matching = len(set(ticket['selected']) & set(ticket['winning']))
+		if matching == 0:
+			continue
+		else:
+			ticket_sum += (2 ** (matching - 1))
+	return ticket_sum
 
-# Silver star
-ticket_sum = 0
-for ticket in parsed:
-	matching = len(set(ticket['selected']) & set(ticket['winning']))
-	if matching == 0:
-		continue
-	else:
-		ticket_sum += (2 ** (matching - 1))
+def gold(input_lines):
+	parsed = Util.input.ParseInputLines(input_lines, _parseLine)
+	match_table = {}
+	ticket_table = {}
+	for ticket in parsed:
+		match_table[ticket['card']] = len(set(ticket['selected']) & set(ticket['winning']))
+		ticket_table[ticket['card']] = 1
 
-print('Silver answer: ' + str(ticket_sum))
+	for ticket in parsed:
+		for i in range(1, match_table[ticket['card']] + 1):
+			ticket_table[ticket['card'] + i] += ticket_table[ticket['card']]
 
-# Gold star
-match_table = {}
-ticket_table = {}
-for ticket in parsed:
-	match_table[ticket['card']] = len(set(ticket['selected']) & set(ticket['winning']))
-	ticket_table[ticket['card']] = 1
+	tickets_count = 0
+	for ticket in parsed:
+		tickets_count += ticket_table[ticket['card']]
 
-for ticket in parsed:
-	for i in range(1, match_table[ticket['card']] + 1):
-		ticket_table[ticket['card'] + i] += ticket_table[ticket['card']]
-
-tickets_count = 0
-for ticket in parsed:
-	tickets_count += ticket_table[ticket['card']]
-
-print('Gold answer: ' + str(tickets_count))
+	return tickets_count

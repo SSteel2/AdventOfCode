@@ -1,27 +1,29 @@
-input_lines = []
-with open('input_gold.txt', 'r') as input_file:
-	for line in input_file:
-		input_lines.append(line.removesuffix('\n'))
+import math
+import Util.input
 
-# Parse input
-times = [i for i in input_lines[0].split(' ') if i != ''][1:]
-distances = [i for i in input_lines[1].split(' ') if i != ''][1:]
-games = [{'time': int(i[0]), 'distance': int(i[1])} for i in zip(times, distances)]
+def getInput(filename):
+	return Util.input.LoadInput(Util.input.GetInputFile(__file__, filename))
 
-# Silver star
-answers = []
-for game in games:
+def silver(input_lines):
+	times = [i for i in input_lines[0].split(' ') if i != ''][1:]
+	distances = [i for i in input_lines[1].split(' ') if i != ''][1:]
+	games = [{'time': int(i[0]), 'distance': int(i[1])} for i in zip(times, distances)]
+
+	answers = []
+	for game in games:
+		answer = 0
+		for i in range(game['time']):
+			if i * (game['time'] - i) > game['distance']:
+				answer += 1
+		answers.append(answer)
+	return math.prod(answers)
+
+def gold(input_lines):
+	time = int(''.join([i for i in input_lines[0].split(' ') if i != ''][1:]))
+	distance = int(''.join([i for i in input_lines[1].split(' ') if i != ''][1:]))
+
 	answer = 0
-	for i in range(game['time']):
-		if i * (game['time'] - i) > game['distance']:
+	for i in range(time):
+		if i * (time - i) > distance:
 			answer += 1
-	answers.append(answer)
-
-product = 1
-for i in answers:
-	product *= i
-
-print('Silver answer: ' + str(product))
-
-# Gold star
-#print('Gold answer: ' + str(current_location_ranges[0].start))
+	return answer

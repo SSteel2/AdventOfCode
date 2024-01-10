@@ -3,7 +3,7 @@ import Util.input
 def getInput(filename):
 	return Util.input.LoadInput(Util.input.GetInputFile(__file__, filename))
 
-def _parseInputLine(line):
+def _parseLine(line):
 	first_colon = line.index(':')
 	game_id = int(line[5:first_colon])
 	games_string = line[first_colon + 2:].split('; ')
@@ -18,15 +18,8 @@ def _parseInputLine(line):
 		games.append(game_dict)
 	return {'game_id': game_id, 'games': games}
 
-def _parseInputLines(input_lines):
-	parsed = []
-	for line in input_lines:
-		parsed.append(_parseInputLine(line))
-	return parsed
-
-# Silver star
 def silver(input_lines):
-	parsed = _parseInputLines(input_lines)
+	parsed = Util.input.ParseInputLines(input_lines, _parseLine)
 
 	# Sum of ID's which are possible games 12 red, 13 green, 14 blue
 	id_sum = 0
@@ -40,11 +33,8 @@ def silver(input_lines):
 			id_sum += game['game_id']
 	return id_sum
 
-# print('Silver answer: ' + str(id_sum))
-
-# Gold star
 def gold(input_lines):
-	parsed = _parseInputLines(input_lines)
+	parsed = Util.input.ParseInputLines(input_lines, _parseLine)
 	
 	# Power of minimum sets
 	power_sum = 0
@@ -62,5 +52,3 @@ def gold(input_lines):
 					minimums['green'] = draw['green']
 		power_sum += (minimums['red'] * minimums['blue'] * minimums['green'])
 	return power_sum
-
-# print('Gold answer: ' + str(power_sum))

@@ -1,12 +1,24 @@
-input_lines = []
-with open('input.txt', 'r') as input_file:
-	for line in input_file:
-		input_lines.append(line.removesuffix('\n'))
+import Util.input
 
-# Parse input
-cards = [{'cards': i.split(' ')[0], 'bid': int(i.split(' ')[1])} for i in input_lines]
+def getInput(filename):
+	return Util.input.LoadInput(Util.input.GetInputFile(__file__, filename))
 
-# Silver star
+def GetTypeFromSortedFrequencies(sorted_frequencies):
+	if sorted_frequencies[0] == 5:
+		return 7
+	elif sorted_frequencies[0] == 4:
+		return 6
+	elif sorted_frequencies[0] == 3 and sorted_frequencies[1] == 2:
+		return 5
+	elif sorted_frequencies[0] == 3:
+		return 4
+	elif sorted_frequencies[0] == 2 and sorted_frequencies[1] == 2:
+		return 3
+	elif sorted_frequencies[0] == 2:
+		return 2
+	else:
+		return 1
+
 def GetType(cards):
 	frequencies = {}
 	for i in cards:
@@ -15,20 +27,7 @@ def GetType(cards):
 		else:
 			frequencies[i] = 1
 	sorted_values = sorted(frequencies.values(), reverse=True)
-	if sorted_values[0] == 5:
-		return 7
-	elif sorted_values[0] == 4:
-		return 6
-	elif sorted_values[0] == 3 and sorted_values[1] == 2:
-		return 5
-	elif sorted_values[0] == 3:
-		return 4
-	elif sorted_values[0] == 2 and sorted_values[1] == 2:
-		return 3
-	elif sorted_values[0] == 2:
-		return 2
-	else:
-		return 1
+	return GetTypeFromSortedFrequencies(sorted_values)
 
 order_value = {
 	'2': 1,
@@ -46,29 +45,25 @@ order_value = {
 	'A': 13
 }
 
-def GetRawValue(cards):
+def GetRawValue(cards, value_table):
 	value = 0
 	for index, card in enumerate(cards):
-		value += order_value[card] * (15 ** (4 - index))
+		value += value_table[card] * (15 ** (4 - index))
 	return value
 
-for i in cards:
-	i['type'] = GetType(i['cards'])
-	i['value'] = GetRawValue(i['cards'])
+def silver(input_lines):
+	cards = [{'cards': i.split(' ')[0], 'bid': int(i.split(' ')[1])} for i in input_lines]
+	for i in cards:
+		i['type'] = GetType(i['cards'])
+		i['value'] = GetRawValue(i['cards'], order_value)
 
-cards.sort(key=lambda x : x['value'])
-cards.sort(key=lambda x : x['type'])
+	cards.sort(key=lambda x : x['value'])
+	cards.sort(key=lambda x : x['type'])
 
-result = 0
-for i, card in enumerate(cards):
-	result += card['bid'] * (i + 1)
-
-print('Silver answer: ' + str(result))
-
-# Gold star
-
-# Parse input
-cardsJokers = [{'cards': i.split(' ')[0], 'bid': int(i.split(' ')[1])} for i in input_lines]
+	result = 0
+	for i, card in enumerate(cards):
+		result += card['bid'] * (i + 1)
+	return result
 
 order_value_jokers = {
 	'J': 1,
@@ -86,12 +81,6 @@ order_value_jokers = {
 	'A': 13
 }
 
-def GetRawValueJokers(cards):
-	value = 0
-	for index, card in enumerate(cards):
-		value += order_value_jokers[card] * (15 ** (4 - index))
-	return value
-
 def GetTypeJokers(cards):
 	frequencies = {}
 	joker_count = 0
@@ -107,30 +96,18 @@ def GetTypeJokers(cards):
 	if len(sorted_values) == 0:
 		sorted_values = [0]
 	sorted_values[0] += joker_count
-	if sorted_values[0] == 5:
-		return 7
-	elif sorted_values[0] == 4:
-		return 6
-	elif sorted_values[0] == 3 and sorted_values[1] == 2:
-		return 5
-	elif sorted_values[0] == 3:
-		return 4
-	elif sorted_values[0] == 2 and sorted_values[1] == 2:
-		return 3
-	elif sorted_values[0] == 2:
-		return 2
-	else:
-		return 1
+	return GetTypeFromSortedFrequencies(sorted_values)
 
-for i in cards:
-	i['type'] = GetTypeJokers(i['cards'])
-	i['value'] = GetRawValueJokers(i['cards'])
+def gold(input_lines):
+	cards = [{'cards': i.split(' ')[0], 'bid': int(i.split(' ')[1])} for i in input_lines]
+	for i in cards:
+		i['type'] = GetTypeJokers(i['cards'])
+		i['value'] = GetRawValue(i['cards'], order_value_jokers)
 
-cards.sort(key=lambda x : x['value'])
-cards.sort(key=lambda x : x['type'])
+	cards.sort(key=lambda x : x['value'])
+	cards.sort(key=lambda x : x['type'])
 
-resultJokers = 0
-for i, card in enumerate(cards):
-	resultJokers += card['bid'] * (i + 1)
-
-print('Gold answer: ' + str(resultJokers))
+	result = 0
+	for i, card in enumerate(cards):
+		result += card['bid'] * (i + 1)
+	return result
