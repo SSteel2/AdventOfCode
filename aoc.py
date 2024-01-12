@@ -1,5 +1,6 @@
 # Runner for all Advent of Code solutions
 import importlib.util
+# I could have used importlib.import_module, but the catch is to use dots '.' instead of slashes...
 import argparse
 import os
 
