@@ -1,10 +1,20 @@
-input_lines = []
-with open('input.txt', 'r') as input_file:
-	for line in input_file:
-		input_lines.append(line.removesuffix('\n'))
+import Util.input
 
-# Parse input
-instructions = [{'direction': i.split(' ')[0], 'length': int(i.split(' ')[1])} for i in input_lines]
+def getInput(filename):
+	return Util.input.LoadInput(Util.input.GetInputFile(__file__, filename))
+
+def _parseSilver(line):
+	return {'direction': line.split(' ')[0], 'length': int(line.split(' ')[1])}
+
+number_direction_map = {
+	'0': 'R',
+	'1': 'D',
+	'2': 'L',
+	'3': 'U'
+}
+
+def _parseGold(line):
+	return {'direction': number_direction_map[line.split(' ')[2][7]], 'length': int(line.split(' ')[2][2:7], base=16)}
 
 def CalculateArea(instructions):
 	area = 0
@@ -22,17 +32,10 @@ def CalculateArea(instructions):
 		perimeter += instruction['length']
 	return area + perimeter // 2 + 1
 
-# Silver star
-print('Silver answer: ' + str(CalculateArea(instructions)))
+def silver(input_lines):
+	instructions = Util.input.ParseInputLines(input_lines, _parseSilver)
+	return CalculateArea(instructions)
 
-# Gold star
-number_to_direction = {
-	'0': 'R',
-	'1': 'D',
-	'2': 'L',
-	'3': 'U'
-}
-
-instructions_gold = [{'direction': number_to_direction[i.split(' ')[2][7]], 'length': int(i.split(' ')[2][2:7], base=16)} for i in input_lines]
-
-print('Gold answer: ' + str(CalculateArea(instructions_gold)))
+def gold(input_lines):
+	instructions = Util.input.ParseInputLines(input_lines, _parseGold)
+	return CalculateArea(instructions)
