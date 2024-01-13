@@ -28,7 +28,7 @@ mirror_right_table = {
 	'L': 'D'
 }
 
-def MoveBeam(current_pos, direction, energy, input_lines):
+def _moveBeam(current_pos, direction, energy, input_lines):
 	if not (current_pos[0] < 0 or current_pos[0] >= len(input_lines) or current_pos[1] < 0 or current_pos[1] >= len(input_lines[0])):
 		energy[current_pos[0]][current_pos[1]] = '#'
 	new_pos = tuple(map(sum, zip(current_pos, directions[direction])))
@@ -52,7 +52,7 @@ def MoveBeam(current_pos, direction, energy, input_lines):
 		else:
 			return [(new_pos[0], new_pos[1], 'R'), (new_pos[0], new_pos[1], 'L')]
 
-def CountEnergy(energy):
+def _countEnergy(energy):
 	count = 0
 	for i in energy:
 		for j in i:
@@ -60,7 +60,7 @@ def CountEnergy(energy):
 				count += 1
 	return count
 
-def LaunchBeam(start_beam, energy, input_lines):
+def _launchBeam(start_beam, energy, input_lines):
 	visited_beams = []
 	current_beams = [start_beam]
 	while len(current_beams) > 0:
@@ -68,13 +68,13 @@ def LaunchBeam(start_beam, energy, input_lines):
 		if beam in visited_beams:
 			continue
 		visited_beams.append(beam)
-		new_beams = MoveBeam(beam[:2], beam[2], energy, input_lines)
+		new_beams = _moveBeam(beam[:2], beam[2], energy, input_lines)
 		current_beams.extend(new_beams)
 
 def silver(input_lines):
 	energy = [['.' for _ in input_lines[0]] for _ in input_lines]
-	LaunchBeam((0, -1, 'R'), energy, input_lines)
-	return CountEnergy(energy)
+	_launchBeam((0, -1, 'R'), energy, input_lines)
+	return _countEnergy(energy)
 
 def gold(input_lines):
 	possible_starts = []
@@ -87,6 +87,6 @@ def gold(input_lines):
 	counts = []
 	for start in possible_starts:
 		energy = [['.' for _ in input_lines[0]] for _ in input_lines]
-		LaunchBeam(start, energy, input_lines)
-		counts.append(CountEnergy(energy))
+		_launchBeam(start, energy, input_lines)
+		counts.append(_countEnergy(energy))
 	return max(counts)
