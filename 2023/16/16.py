@@ -1,10 +1,7 @@
-input_lines = []
-with open('input.txt', 'r') as input_file:
-	for line in input_file:
-		input_lines.append(line.removesuffix('\n'))
+import Util.input
 
-# Parse input
-energy = [['.' for _ in input_lines[0]] for _ in input_lines]
+def getInput(filename):
+	return Util.input.LoadInput(Util.input.GetInputFile(__file__, filename))
 
 directions = {
 	'U': (-1, 0),
@@ -31,14 +28,12 @@ mirror_right_table = {
 	'L': 'D'
 }
 
-# Silver star
-
-def MoveBeam(current_pos, direction):
+def MoveBeam(current_pos, direction, energy, input_lines):
 	if not (current_pos[0] < 0 or current_pos[0] >= len(input_lines) or current_pos[1] < 0 or current_pos[1] >= len(input_lines[0])):
 		energy[current_pos[0]][current_pos[1]] = '#'
 	new_pos = tuple(map(sum, zip(current_pos, directions[direction])))
 	if new_pos[0] < 0 or new_pos[0] >= len(input_lines) or new_pos[1] < 0 or new_pos[1] >= len(input_lines[0]):
-		return []  # no move
+		return []
 	symbol = input_lines[new_pos[0]][new_pos[1]]
 	if symbol == '.':
 		return [(new_pos[0], new_pos[1], direction)]
@@ -65,7 +60,7 @@ def CountEnergy(energy):
 				count += 1
 	return count
 
-def LaunchBeam(start_beam):
+def LaunchBeam(start_beam, energy, input_lines):
 	visited_beams = []
 	current_beams = [start_beam]
 	while len(current_beams) > 0:
@@ -73,25 +68,25 @@ def LaunchBeam(start_beam):
 		if beam in visited_beams:
 			continue
 		visited_beams.append(beam)
-		new_beams = MoveBeam(beam[:2], beam[2])
+		new_beams = MoveBeam(beam[:2], beam[2], energy, input_lines)
 		current_beams.extend(new_beams)
 
-LaunchBeam((0, -1, 'R'))
-print('Silver answer: ' + str(CountEnergy(energy)))
-
-# Gold star
-
-possible_starts = []
-for i in range(len(input_lines)):
-	possible_starts.append((i, -1, 'R'))
-	possible_starts.append((i, len(input_lines[0]), 'L'))
-	possible_starts.append((-1, i, 'D'))
-	possible_starts.append((len(input_lines), i, 'U'))
-
-counts = []
-for start in possible_starts:
+def silver(input_lines):
 	energy = [['.' for _ in input_lines[0]] for _ in input_lines]
-	LaunchBeam(start)
-	counts.append(CountEnergy(energy))
+	LaunchBeam((0, -1, 'R'), energy, input_lines)
+	return CountEnergy(energy)
 
-print('Gold answer: ' + str(max(counts)))
+def gold(input_lines):
+	possible_starts = []
+	for i in range(len(input_lines)):
+		possible_starts.append((i, -1, 'R'))
+		possible_starts.append((i, len(input_lines[0]), 'L'))
+		possible_starts.append((-1, i, 'D'))
+		possible_starts.append((len(input_lines), i, 'U'))
+
+	counts = []
+	for start in possible_starts:
+		energy = [['.' for _ in input_lines[0]] for _ in input_lines]
+		LaunchBeam(start, energy, input_lines)
+		counts.append(CountEnergy(energy))
+	return max(counts)
