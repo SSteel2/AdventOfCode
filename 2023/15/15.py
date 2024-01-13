@@ -1,10 +1,7 @@
-input_lines = []
-with open('input.txt', 'r') as input_file:
-	for line in input_file:
-		input_lines.append(line.removesuffix('\n'))
+import Util.input
 
-# Parse input
-chops = input_lines[0].split(',')
+def getInput(filename):
+	return Util.input.LoadInput(Util.input.GetInputFile(__file__, filename))
 
 def GetHash(value):
 	current_hash = 0
@@ -14,14 +11,12 @@ def GetHash(value):
 		current_hash %= 256
 	return current_hash
 
-# Silver star
-total_hash = 0
-for chop in chops:
-	total_hash += GetHash(chop)
-
-print('Silver answer: ' + str(total_hash))
-
-# Gold star
+def silver(input_lines):
+	chops = input_lines[0].split(',')
+	total_hash = 0
+	for chop in chops:
+		total_hash += GetHash(chop)
+	return total_hash
 
 def GetLabelIndex(label, box):
 	for i, lens in enumerate(box):
@@ -29,33 +24,33 @@ def GetLabelIndex(label, box):
 			return i
 	return -1
 
-boxes = [[] for _ in range(256)]
-for chop in chops:
-	operation_index = chop.find('=')
-	if operation_index == -1:
-		label = chop[:-1]
-		label_hash = GetHash(label)
-		label_index = GetLabelIndex(label, boxes[label_hash])
-		if label_index != -1:
-			del boxes[label_hash][label_index]
-	else:
-		label = chop[:operation_index]
-		lens_value = chop[operation_index + 1:]
-		label_hash = GetHash(label)
-		label_index = GetLabelIndex(label, boxes[label_hash])
-		if label_index != -1:
-			boxes[label_hash][label_index] = (label, lens_value)
+def gold(input_lines):
+	chops = input_lines[0].split(',')
+	boxes = [[] for _ in range(256)]
+	for chop in chops:
+		operation_index = chop.find('=')
+		if operation_index == -1:
+			label = chop[:-1]
+			label_hash = GetHash(label)
+			label_index = GetLabelIndex(label, boxes[label_hash])
+			if label_index != -1:
+				del boxes[label_hash][label_index]
 		else:
-			boxes[label_hash].append((label, lens_value))
+			label = chop[:operation_index]
+			lens_value = chop[operation_index + 1:]
+			label_hash = GetHash(label)
+			label_index = GetLabelIndex(label, boxes[label_hash])
+			if label_index != -1:
+				boxes[label_hash][label_index] = (label, lens_value)
+			else:
+				boxes[label_hash].append((label, lens_value))
 
-focus_power = 0
-box_number = 1
-for box in boxes:
-	lens_number = 1
-	for lens in box:
-		focus_power += (box_number * lens_number * int(lens[1]))
-		lens_number += 1
-	box_number += 1
-
-print('Gold answer: ' + str(focus_power))
-
+	focus_power = 0
+	box_number = 1
+	for box in boxes:
+		lens_number = 1
+		for lens in box:
+			focus_power += (box_number * lens_number * int(lens[1]))
+			lens_number += 1
+		box_number += 1
+	return focus_power
