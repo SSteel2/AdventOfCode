@@ -1,4 +1,5 @@
 import Util.input
+import Util.directions
 
 def getInput(filename):
 	return Util.input.LoadInput(Util.input.GetInputFile(__file__, filename))
@@ -9,28 +10,21 @@ def FindStart(input_lines):
 			if col == 'S':
 				return (i, j)
 
-directions = {
-	'N': (-1, 0),
-	'E': (0, 1),
-	'S': (1, 0),
-	'W': (0, -1)
-}
-
 valid_moves = {
-	'|': ['N', 'S'],
-	'-': ['E', 'W'],
-	'L': ['N', 'E'],
-	'J': ['N', 'W'],
-	'7': ['S', 'W'],
-	'F': ['S', 'E']
+	'|': ['U', 'D'],
+	'-': ['R', 'L'],
+	'L': ['U', 'R'],
+	'J': ['U', 'L'],
+	'7': ['D', 'L'],
+	'F': ['D', 'R']
 }
 
 def GetNextMove(input_lines, current, last):
 	moves = valid_moves[input_lines[current[0]][current[1]]]
-	if tuple(map(sum, zip(current, directions[moves[0]]))) != last:
-		return tuple(map(sum, zip(current, directions[moves[0]])))
+	if Util.directions.Move(current, moves[0]) != last:
+		return Util.directions.Move(current, moves[0])
 	else:
-		return tuple(map(sum, zip(current, directions[moves[1]])))
+		return Util.directions.Move(current, moves[1])
 
 def GetRoute(input_lines, start):
 	last_pos = (start[0], start[1])

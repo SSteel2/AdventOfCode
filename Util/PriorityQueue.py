@@ -2,6 +2,9 @@ class PriorityQueue:
 	def __init__(self):
 		self.values = {}
 
+	def __len__(self):
+		return len(self.values)
+
 	def append(self, priority, value):
 		if priority in self.values:
 			self.values[priority].append(value)
@@ -16,6 +19,3 @@ class PriorityQueue:
 			return result
 		else:
 			return self.values[low_key].pop()
-
-	def __len__(self):
-		return len(self.values)

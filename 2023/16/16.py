@@ -1,14 +1,8 @@
 import Util.input
+import Util.directions
 
 def getInput(filename):
 	return Util.input.LoadInput(Util.input.GetInputFile(__file__, filename))
-
-directions = {
-	'U': (-1, 0),
-	'R': (0, 1),
-	'D': (1, 0),
-	'L': (0, -1)
-}
 
 mirror_left = '\\'
 mirror_right = '/'
@@ -31,7 +25,7 @@ mirror_right_table = {
 def _moveBeam(current_pos, direction, energy, input_lines):
 	if not (current_pos[0] < 0 or current_pos[0] >= len(input_lines) or current_pos[1] < 0 or current_pos[1] >= len(input_lines[0])):
 		energy[current_pos[0]][current_pos[1]] = '#'
-	new_pos = tuple(map(sum, zip(current_pos, directions[direction])))
+	new_pos = Util.directions.Move(current_pos, direction)
 	if new_pos[0] < 0 or new_pos[0] >= len(input_lines) or new_pos[1] < 0 or new_pos[1] >= len(input_lines[0]):
 		return []
 	symbol = input_lines[new_pos[0]][new_pos[1]]
