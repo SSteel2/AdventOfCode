@@ -8,7 +8,7 @@ B = 'broadcaster'
 FF = 'flip-flop'
 CON = 'conjunction'
 
-def ParseEquipment(input_lines):
+def _parseEquipment(input_lines):
 	equipment = {}
 	for line in input_lines:
 		split_arrow = line.split(' -> ')
@@ -28,7 +28,7 @@ def ParseEquipment(input_lines):
 			equipment[name]['memory'] = memory
 	return equipment
 
-def ProcessBroadcaster(current, equipment):
+def _processBroadcaster(current, equipment):
 	receivers = []
 	name = current[0]
 	signal = current[1]
@@ -36,7 +36,7 @@ def ProcessBroadcaster(current, equipment):
 		receivers.append((i, signal, name))
 	return receivers
 
-def ProcessFlipflop(current, equipment):
+def _processFlipflop(current, equipment):
 	receivers = []
 	name = current[0]
 	signal = current[1]
@@ -52,7 +52,7 @@ def ProcessFlipflop(current, equipment):
 		equipment[name]['state'] = 'off'
 	return receivers
 
-def ProcessConjunction(current, equipment):
+def _processConjunction(current, equipment):
 	receivers = []
 	name = current[0]
 	signal = current[1]
@@ -66,7 +66,7 @@ def ProcessConjunction(current, equipment):
 			receivers.append((i, 'high', name))
 	return receivers
 
-def ProcessQueue(queue, equipment, counts):
+def _processQueue(queue, equipment, counts):
 	while len(queue) > 0:
 		receivers = []
 		current = queue.pop()
@@ -74,45 +74,45 @@ def ProcessQueue(queue, equipment, counts):
 		if current[0] not in equipment:
 			continue
 		if equipment[current[0]]['type'] == B:
-			receivers = ProcessBroadcaster(current, equipment)
+			receivers = _processBroadcaster(current, equipment)
 		elif equipment[current[0]]['type'] == FF:
-			receivers = ProcessFlipflop(current, equipment)
+			receivers = _processFlipflop(current, equipment)
 		elif equipment[current[0]]['type'] == CON:
-			receivers = ProcessConjunction(current, equipment)
+			receivers = _processConjunction(current, equipment)
 		for receiver in receivers:
 			queue.appendleft(receiver)
 
-def PushButton(equipment, func, params):
+def _pushButton(equipment, func, params):
 	queue = collections.deque()
 	queue.appendleft((B, 'low', 'button'))
 	func(queue, equipment, *params)
 
 def silver(input_lines):
-	equipment = ParseEquipment(input_lines)
+	equipment = _parseEquipment(input_lines)
 	counts = {'low': 0, 'high': 0}
 	for i in range(1000):
-		PushButton(equipment, ProcessQueue, [counts])
+		_pushButton(equipment, _processQueue, [counts])
 	return counts['low'] * counts['high']
 
-def ProcessQueueGold(queue, equipment, con_memory, button_pushes):
+def _processQueueGold(queue, equipment, con_memory, button_pushes):
 	while len(queue) > 0:
 		receivers = []
 		current = queue.pop()
 		if current[0] not in equipment:
 			continue
 		if equipment[current[0]]['type'] == B:
-			receivers = ProcessBroadcaster(current, equipment)
+			receivers = _processBroadcaster(current, equipment)
 		elif equipment[current[0]]['type'] == FF:
-			receivers = ProcessFlipflop(current, equipment)
+			receivers = _processFlipflop(current, equipment)
 		elif equipment[current[0]]['type'] == CON:
 			if current[0] in con_memory and current[1] == 'low':
 				con_memory[current[0]].append(button_pushes)
-			receivers = ProcessConjunction(current, equipment)
+			receivers = _processConjunction(current, equipment)
 		for receiver in receivers:
 			queue.appendleft(receiver)
 
 def gold(input_lines):
-	equipment = ParseEquipment(input_lines)
+	equipment = _parseEquipment(input_lines)
 
 	con_memory = {}
 	for name in equipment:
@@ -124,7 +124,7 @@ def gold(input_lines):
 	current_push = 0
 	while button_pushes < max_count:
 		button_pushes += 1
-		PushButton(equipment, ProcessQueueGold, [con_memory, button_pushes])
+		_pushButton(equipment, _processQueueGold, [con_memory, button_pushes])
 
 	product = 1
 	for name in con_memory:
