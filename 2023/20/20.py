@@ -1,16 +1,14 @@
 import collections
+import Util.input
 
-input_lines = []
-with open('input.txt', 'r') as input_file:
-	for line in input_file:
-		input_lines.append(line.removesuffix('\n'))
+def getInput(filename):
+	return Util.input.LoadInput(Util.input.GetInputFile(__file__, filename))
 
 B = 'broadcaster'
 FF = 'flip-flop'
 CON = 'conjunction'
 
-# Parse input
-def ParseEquipment():
+def ParseEquipment(input_lines):
 	equipment = {}
 	for line in input_lines:
 		split_arrow = line.split(' -> ')
@@ -30,107 +28,105 @@ def ParseEquipment():
 			equipment[name]['memory'] = memory
 	return equipment
 
-# Silver star
-def ProcessBroadcaster(current):
+def ProcessBroadcaster(current, equipment):
+	receivers = []
 	name = current[0]
 	signal = current[1]
 	for i in equipment[name]['outputs']:
-		queue.appendleft((i, signal, name))
+		receivers.append((i, signal, name))
+	return receivers
 
-def ProcessFlipflop(current):
+def ProcessFlipflop(current, equipment):
+	receivers = []
 	name = current[0]
 	signal = current[1]
 	if signal == 'high':
-		return
+		return receivers
 	if equipment[name]['state'] == 'off':
 		for i in equipment[name]['outputs']:
-			queue.appendleft((i, 'high', name))
+			receivers.append((i, 'high', name))
 		equipment[name]['state'] = 'on'
 	else:
 		for i in equipment[name]['outputs']:
-			queue.appendleft((i, 'low', name))
+			receivers.append((i, 'low', name))
 		equipment[name]['state'] = 'off'
+	return receivers
 
-def ProcessConjunction(current):
+def ProcessConjunction(current, equipment):
+	receivers = []
 	name = current[0]
 	signal = current[1]
 	sender = current[2]
 	equipment[name]['memory'][sender] = signal
 	if all([(True if equipment[name]['memory'][x] == 'high' else False) for x in equipment[name]['memory']]):
 		for i in equipment[name]['outputs']:
-			queue.appendleft((i, 'low', name))
+			receivers.append((i, 'low', name))
 	else:
 		for i in equipment[name]['outputs']:
-			queue.appendleft((i, 'high', name))
+			receivers.append((i, 'high', name))
+	return receivers
 
-def ProcessQueue():
+def ProcessQueue(queue, equipment, counts):
 	while len(queue) > 0:
+		receivers = []
 		current = queue.pop()
-		# print(f"{current[2]} -{current[1]}-> {current[0]}")
 		counts[current[1]] += 1
 		if current[0] not in equipment:
 			continue
 		if equipment[current[0]]['type'] == B:
-			ProcessBroadcaster(current)
+			receivers = ProcessBroadcaster(current, equipment)
 		elif equipment[current[0]]['type'] == FF:
-			ProcessFlipflop(current)
+			receivers = ProcessFlipflop(current, equipment)
 		elif equipment[current[0]]['type'] == CON:
-			ProcessConjunction(current)			
+			receivers = ProcessConjunction(current, equipment)
+		for receiver in receivers:
+			queue.appendleft(receiver)
 
-def PushButton():
+def PushButton(equipment, func, params):
+	queue = collections.deque()
 	queue.appendleft((B, 'low', 'button'))
-	ProcessQueue()
+	func(queue, equipment, *params)
 
-queue = collections.deque()
-counts = {'low': 0, 'high': 0}
+def silver(input_lines):
+	equipment = ParseEquipment(input_lines)
+	counts = {'low': 0, 'high': 0}
+	for i in range(1000):
+		PushButton(equipment, ProcessQueue, [counts])
+	return counts['low'] * counts['high']
 
-equipment = ParseEquipment()
-
-for i in range(1000):
-	PushButton()
-
-print('Silver answer: ' + str(counts['low'] * counts['high']))
-
-# Gold star
-
-def ProcessQueueGold():
+def ProcessQueueGold(queue, equipment, con_memory, button_pushes):
 	while len(queue) > 0:
+		receivers = []
 		current = queue.pop()
-		# print(f"{current[2]} -{current[1]}-> {current[0]}")
-		counts[current[1]] += 1
 		if current[0] not in equipment:
 			continue
 		if equipment[current[0]]['type'] == B:
-			ProcessBroadcaster(current)
+			receivers = ProcessBroadcaster(current, equipment)
 		elif equipment[current[0]]['type'] == FF:
-			ProcessFlipflop(current)
+			receivers = ProcessFlipflop(current, equipment)
 		elif equipment[current[0]]['type'] == CON:
 			if current[0] in con_memory and current[1] == 'low':
 				con_memory[current[0]].append(button_pushes)
-			ProcessConjunction(current)
+			receivers = ProcessConjunction(current, equipment)
+		for receiver in receivers:
+			queue.appendleft(receiver)
 
-def PushButtonGold():
-	queue.appendleft((B, 'low', 'button'))
-	ProcessQueueGold()
+def gold(input_lines):
+	equipment = ParseEquipment(input_lines)
 
-queue = collections.deque()
-equipment = ParseEquipment()
+	con_memory = {}
+	for name in equipment:
+		if equipment[name]['type'] == CON and len(equipment[name]['memory']) == 1:
+			con_memory[name] = []
 
-con_memory = {}
-for name in equipment:
-	if equipment[name]['type'] == CON and len(equipment[name]['memory']) == 1:
-		con_memory[name] = []
+	button_pushes = 0
+	max_count = 5000
+	current_push = 0
+	while button_pushes < max_count:
+		button_pushes += 1
+		PushButton(equipment, ProcessQueueGold, [con_memory, button_pushes])
 
-button_pushes = 0
-max_count = 5000
-current_push = 0
-while max_count > 0:
-	button_pushes += 1
-	PushButtonGold()
-	max_count -= 1
-
-product = 1
-for name in con_memory:
-	product *= con_memory[name][0]
-
-print('Gold answer: ' + str(product))
+	product = 1
+	for name in con_memory:
+		product *= con_memory[name][0]
+	return product
