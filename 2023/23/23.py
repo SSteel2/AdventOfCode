@@ -1,73 +1,54 @@
 import collections
+import Util.input
+import Util.directions
 
-input_lines = []
-with open('input.txt', 'r') as input_file:
-	for line in input_file:
-		input_lines.append(line.removesuffix('\n'))
+def getInput(filename):
+	return Util.input.LoadInput(Util.input.GetInputFile(__file__, filename))
 
-# Parse input
-directions_map = {
-	'^': (-1, 0),
-	'>': (0, 1),
-	'v': (1, 0),
-	'<': (0, -1)
-}
+def _getBoundaryLocations(input_lines):
+	for i, col in enumerate(input_lines[0]):
+		if col == '.':
+			global_start = (0, i)
+	for i, col in enumerate(input_lines[-1]):
+		if col == '.':
+			global_end = (len(input_lines) - 1, i)
+	return global_start, global_end
 
-inverse_directions_map = {
-	'^': 'v',
-	'>': '<',
-	'v': '^',
-	'<': '>',
-	'.': '.'
-}
-
-for i, col in enumerate(input_lines[0]):
-	if col == '.':
-		global_start = (0, i)
-for i, col in enumerate(input_lines[-1]):
-	if col == '.':
-		global_end = (len(input_lines) - 1, i)
-
-def MapValue(position):
+def _mapValue(position, input_lines):
 	return input_lines[position[0]][position[1]]
 
-def NextPosition(position, direction):
-	return tuple(map(sum, zip(directions_map[direction], position)))
-
-def IsValid(position):
-	if position[0] >= len(input_lines) or position[0] < 0 or position[1] >= len(input_lines[0]) or position[1] < 0 or MapValue(position) == '#':
+def _isValid(position, input_lines):
+	if position[0] >= len(input_lines) or position[0] < 0 or position[1] >= len(input_lines[0]) or position[1] < 0 or _mapValue(position, input_lines) == '#':
 		return False
 	return True
 
-def GetBranch(tree, start):
+def _getBranch(tree, start):
 	for i in tree:
 		if i['start'] == start:
 			return i
 	return None
 
-def FindNextPosition(current, last):
-	# print(f"FindNextPosition {current} {last}")
-	if MapValue(current) in directions_map:
-		return [(NextPosition(current, MapValue(current)), False)]
+def _findNextPosition(current, last, input_lines, global_end):
+	if _mapValue(current, input_lines) in Util.directions.DirectionsTable:
+		return [(Util.directions.Move(current, _mapValue(current, input_lines)), False)]
 	possible_positions = []
-	for direction in directions_map:
+	for direction in Util.directions.DirectionsTable:
 		is_end_pos = False
-		next_pos = NextPosition(current, direction)
-		if not IsValid(next_pos) or last == next_pos or inverse_directions_map[MapValue(next_pos)] == direction:
+		next_pos = Util.directions.Move(current, direction)
+		if not _isValid(next_pos, input_lines) or last == next_pos or Util.directions.Inverse(_mapValue(next_pos, input_lines)) == direction:
 			continue  # invalid position
-		if MapValue(next_pos) in directions_map or next_pos == global_end:
+		if _mapValue(next_pos, input_lines) in Util.directions.DirectionsTable or next_pos == global_end:
 			is_end_pos = True
 		possible_positions.append((next_pos, is_end_pos))
 	return possible_positions
 
-def ConstructPath(start):
-	# print(f"ConstructPath {start}")
+def _constructPath(start, input_lines, global_end):
 	moving = True
 	current = start
 	last_pos = None
 	current_length = 0
 	while moving:
-		next_positions = FindNextPosition(current, last_pos)
+		next_positions = _findNextPosition(current, last_pos, input_lines, global_end)
 		if next_positions[0][1]:
 			moving = False
 			if next_positions[0][0] == global_end:
@@ -77,64 +58,54 @@ def ConstructPath(start):
 		current_length += 1
 	return {'start': start, 'length': current_length, 'end': [i[0] for i in next_positions]}
 
-def ConstructPathTree(start):
-	# print(f"ConstructPathTree {start}")
+def _constructPathTree(start, input_lines, global_end):
 	tree = []
 	queue = collections.deque()
 	queue.appendleft(start)
 	while len(queue) > 0:
 		local_start = queue.pop()
-		if GetBranch(tree, local_start) != None:
+		if _getBranch(tree, local_start) != None:
 			continue
-		branch = ConstructPath(local_start)
+		branch = _constructPath(local_start, input_lines, global_end)
 		tree.append(branch)
 		for i in branch['end']:
 			queue.appendleft(i)
 	return tree
 
-tree = ConstructPathTree(global_start)
-
-# debug start
-# for i in tree:
-# 	print(i)
-# debug end
-
-# Silver star
-
-def dfs(tree, start):
+def _dfs(tree, start):
 	current_length = 0
-	current = GetBranch(tree, start)
+	current = _getBranch(tree, start)
 	current_length += current['length']
 	if len(current['end']) == 0:
 		return current_length
 	max_length = -1
 	for i in current['end']:
-		l = dfs(tree, i)
+		l = _dfs(tree, i)
 		if l > max_length:
 			max_length = l
 	return current_length + max_length
 
-result = dfs(tree, global_start)
-print('Silver answer: ' + str(result))
+def silver(input_lines):
+	chart = Util.directions.Convert(input_lines, {'^': 'U', '<': 'L', 'v': 'D', '>': 'R'})
+	global_start, global_end = _getBoundaryLocations(chart)
+	tree = _constructPathTree(global_start, chart, global_end)
+	result = _dfs(tree, global_start)
+	return result
 
-# Gold star
-
-def FindNextPositionGold(current, last):
-	# print(f"FindNextPositionGold {current} {last}")
+def _findNextPositionGold(current, last, input_lines):
 	possible_positions = []
-	for direction in directions_map:
-		next_pos = NextPosition(current, direction)
-		if not IsValid(next_pos) or last == next_pos:
+	for direction in Util.directions.DirectionsTable:
+		next_pos = Util.directions.Move(current, direction)
+		if not _isValid(next_pos, input_lines) or last == next_pos:
 			continue  # invalid position
 		possible_positions.append(next_pos)
 	return possible_positions
 
-def ConstructEdges(start):
-	# print(f"ConstructEdges {start}")
+def _constructEdges(start, input_lines):
 	edges = []
-	for direction in directions_map:
-		next_pos = NextPosition(start, direction)
-		if not IsValid(next_pos):
+	for direction in Util.directions.DirectionsTable:
+		next_pos = Util.directions.Move(start, direction)
+		if not _isValid(next_pos, input_lines):
 			continue
 
 		moving = True
@@ -143,7 +114,7 @@ def ConstructEdges(start):
 		current_length = 0
 
 		while moving:
-			next_positions = FindNextPositionGold(current, last_pos)
+			next_positions = _findNextPositionGold(current, last_pos, input_lines)
 			if len(next_positions) == 1:
 				current, last_pos = next_positions[0], current
 			else:
@@ -152,14 +123,13 @@ def ConstructEdges(start):
 		edges.append({'start': start, 'length': current_length, 'end': current}) # check for same end
 	return edges
 
-def GetEdge(graph, start, end):
+def _getEdge(graph, start, end):
 	for edge in graph:
 		if edge['start'] == start and edge['end'] == end:
 			return edge
 	return None
 
-def ConstructPathGraph(start):
-	# print(f"ConstructPathGraph {start}")
+def _constructPathGraph(start, input_lines):
 	graph = []
 	visited_nodes = [start]
 	queue = collections.deque()
@@ -167,12 +137,11 @@ def ConstructPathGraph(start):
 	count = 100
 	while len(queue) > 0 and count > 0:
 		count -= 1
-		# print(queue)
 		local_start = queue.pop()
-		edges = ConstructEdges(local_start)
+		edges = _constructEdges(local_start, input_lines)
 		visited_nodes.append(local_start)
 		for i in edges:
-			inverse_edge = GetEdge(graph, i['end'], i['start'])
+			inverse_edge = _getEdge(graph, i['end'], i['start'])
 			if inverse_edge == None:
 				graph.append(i)
 			else:
@@ -182,21 +151,14 @@ def ConstructPathGraph(start):
 				queue.appendleft(i['end'])
 	return graph
 
-graph = ConstructPathGraph(global_start)
-
-# debug start
-# for i in graph:
-# 	print(i)
-# debug end
-
-def GetEdges(graph, node):
+def _getEdges(graph, node):
 	edges = []
 	for edge in graph:
 		if edge['start'] == node or edge['end'] == node:
 			edges.append(edge)
 	return edges
 
-def OtherEnd(edge, node):
+def _otherEnd(edge, node):
 	if node == edge['start']:
 		return edge['end']
 	elif node == edge['end']:
@@ -204,21 +166,23 @@ def OtherEnd(edge, node):
 	else:
 		print("very very bad")
 
-def backtracking(graph, start, length, visited):
+def _backtracking(graph, start, length, visited, global_end):
 	if start == global_end:
 		return length
 
 	visited_nodes = [start] + visited
-	edges = GetEdges(graph, start)
+	edges = _getEdges(graph, start)
 	max_length = 0
 	for edge in edges:
-		end = OtherEnd(edge, start)
+		end = _otherEnd(edge, start)
 		if end not in visited_nodes:
-			l = backtracking(graph, end, length + edge['length'], visited_nodes)
+			l = _backtracking(graph, end, length + edge['length'], visited_nodes, global_end)
 			if l > max_length:
 				max_length = l
 	return max_length
 
-result = backtracking(graph, global_start, 0, [])
-
-print('Gold answer: ' + str(result))
+def gold(input_lines):
+	global_start, global_end = _getBoundaryLocations(input_lines)
+	graph = _constructPathGraph(global_start, input_lines)
+	result = _backtracking(graph, global_start, 0, [], global_end)
+	return result
