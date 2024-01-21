@@ -1,4 +1,5 @@
 import Util.input
+import Util.Frequency
 
 def getInput(filename):
 	return Util.input.LoadInput(Util.input.GetInputFile(__file__, filename))
@@ -20,12 +21,9 @@ def GetTypeFromSortedFrequencies(sorted_frequencies):
 		return 1
 
 def GetType(cards):
-	frequencies = {}
+	frequencies = Util.Frequency.Frequency()
 	for i in cards:
-		if i in frequencies:
-			frequencies[i] += 1
-		else:
-			frequencies[i] = 1
+		frequencies.add(i)
 	sorted_values = sorted(frequencies.values(), reverse=True)
 	return GetTypeFromSortedFrequencies(sorted_values)
 
@@ -82,16 +80,13 @@ order_value_jokers = {
 }
 
 def GetTypeJokers(cards):
-	frequencies = {}
+	frequencies = Util.Frequency.Frequency()
 	joker_count = 0
 	for i in cards:
 		if i == 'J':
 			joker_count += 1
 			continue
-		if i in frequencies:
-			frequencies[i] += 1
-		else:
-			frequencies[i] = 1
+		frequencies.add(i)
 	sorted_values = sorted(frequencies.values(), reverse=True)
 	if len(sorted_values) == 0:
 		sorted_values = [0]
