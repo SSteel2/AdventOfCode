@@ -9,6 +9,8 @@ def timedExecution(func, input_lines):
 	start_time = time.perf_counter_ns()
 	result = func(input_lines)
 	end_time = time.perf_counter_ns()
+	if result is None:
+		return None, None
 	return result, end_time - start_time
 
 def launchSolution(year, day):
@@ -28,10 +30,28 @@ def getAllDays(year):
 	return next(os.walk(f'20{year}'))[1]
 
 def printAnswers(results, task):
-	print(f'[Day {task:0>2} Answer]  Silver {results[0]:18}  | Gold: {results[1]:18}')
+	output = f'[Day {task:0>2} Answer]'
+	if results[0] is None:
+		output += f'  Silver: {"None":>18}'
+	else:
+		output += f'  Silver: {results[0]:18}'
+	if results[1] is None:
+		output += f'  | Gold: {"None":>18}'
+	else:
+		output += f'  | Gold: {results[1]:18}'
+	print(output)
 
 def printTime(times, task):
-	print(f'[Day {task:0>2} Time (s)]  Silver {times[0] // 100000 / 10000:15.4f}  | Gold: {times[1] // 100000 / 10000:15.4f}')
+	output = f'[Day {task:0>2} Time (s)]'
+	if times[0] is None:
+		output += f'  Silver: {"None":>15}'
+	else:
+		output += f'  Silver: {times[0] // 100000 / 10000:15.4f}'
+	if times[1] is None:
+		output += f'  | Gold: {"None":>15}'
+	else:
+		output += f'  | Gold: {times[1] // 100000 / 10000:15.4f}'
+	print(output)
 
 def runSingle(year, day, isOutputTime, isOutputAnswers):
 	results, times = launchSolution(year, day)
