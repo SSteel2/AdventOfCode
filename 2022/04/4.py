@@ -21,8 +21,4 @@ def silver(input_lines):
 
 def gold(input_lines):
 	parsed = Util.input.ParseInputLines(input_lines, _parseLine)
-	score = 0
-	for line in parsed:
-		if line[0].isIntersecting(line[1]):
-			score += 1
-	return score
+	return sum(i[0].isIntersecting(i[1]) for i in parsed)

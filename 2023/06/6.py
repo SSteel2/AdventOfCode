@@ -22,8 +22,6 @@ def gold(input_lines):
 	time = int(''.join([i for i in input_lines[0].split(' ') if i != ''][1:]))
 	distance = int(''.join([i for i in input_lines[1].split(' ') if i != ''][1:]))
 
-	answer = 0
-	for i in range(time):
-		if i * (time - i) > distance:
-			answer += 1
-	return answer
+	start = (time - math.sqrt(time ** 2 - 4 * distance)) / 2
+	end = (time + math.sqrt(time ** 2 - 4 * distance)) / 2
+	return math.floor(end) - math.floor(start)
