@@ -3,20 +3,6 @@ import Util.input
 def getInput(filename):
 	return Util.input.LoadInput(Util.input.GetInputFile(__file__, filename))
 
-def _distance1D(a, b, empty_locations, multiplier):
-	small = min(a, b)
-	big = max(a, b)
-	distance = big - small
-	longs = empty_locations[big] - empty_locations[small]
-	return longs * multiplier + distance
-
-def _distances1D(location_frequencies, locations, empty_locations, multiplier):
-	distance_sum = 0
-	for i in range(len(locations)):
-		for j in range(i + 1, len(locations)):
-			distance_sum += (_distance1D(locations[i], locations[j], empty_locations, multiplier) * location_frequencies[locations[i]] * location_frequencies[locations[j]])
-	return distance_sum
-
 def _findEmptyLocations(locations, size):
 	empty_locations = []
 	current_value = 0
@@ -25,6 +11,30 @@ def _findEmptyLocations(locations, size):
 			current_value += 1
 		empty_locations.append(current_value)
 	return empty_locations
+
+def _makeStarClusters(location_keys, empty_locations, star_frequncies):
+	star_clusters = {}
+	for i in location_keys:
+		if empty_locations[i] not in star_clusters:
+			star_clusters[empty_locations[i]] = star_frequncies[i]
+		else:
+			star_clusters[empty_locations[i]] += star_frequncies[i]
+	return star_clusters
+
+def _calculateClusterDistances(star_clusters):
+	star_clusters_keys = list(star_clusters.keys())
+	distance = 0
+	for i in range(len(star_clusters_keys)):
+		for j in range(i + 1, len(star_clusters_keys)):
+			distance += ((star_clusters_keys[j] - star_clusters_keys[i]) * star_clusters[star_clusters_keys[i]] * star_clusters[star_clusters_keys[j]])
+	return distance
+
+def _calculateDistances(stars, star_keys):
+	distance = 0
+	for i in range(len(star_keys)):
+		for j in range(i + 1, len(star_keys)):
+			distance += ((star_keys[j] - star_keys[i]) * stars[star_keys[i]] * stars[star_keys[j]])
+	return distance
 
 def _findStarDistances(galaxy, expansion_multiplier):
 	stars_rows = {}
@@ -41,13 +51,17 @@ def _findStarDistances(galaxy, expansion_multiplier):
 				else:
 					stars_cols[j] += 1
 	stars_rows_keys = list(stars_rows.keys())
-	stars_cols_keys = list(stars_cols.keys())
+	stars_cols_keys = sorted(list(stars_cols.keys()))
 
-	empty_cols = _findEmptyLocations(stars_cols_keys, len(galaxy[0]))
 	empty_rows = _findEmptyLocations(stars_rows_keys, len(galaxy))
+	empty_cols = _findEmptyLocations(stars_cols_keys, len(galaxy[0]))
 
-	multiplier = expansion_multiplier - 1
-	return _distances1D(stars_rows, stars_rows_keys, empty_rows, multiplier) + _distances1D(stars_cols, stars_cols_keys, empty_cols, multiplier)
+	stars_rows_clusters = _makeStarClusters(stars_rows_keys, empty_rows, stars_rows)
+	stars_cols_clusters = _makeStarClusters(stars_cols_keys, empty_cols, stars_cols)
+
+	total_distance = (_calculateClusterDistances(stars_rows_clusters) + _calculateClusterDistances(stars_cols_clusters)) * (expansion_multiplier - 1)
+	total_distance += _calculateDistances(stars_rows, stars_rows_keys) + _calculateDistances(stars_cols, stars_cols_keys)
+	return total_distance
 
 def silver(input_lines):
 	return _findStarDistances(input_lines, 2)
