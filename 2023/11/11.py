@@ -4,19 +4,29 @@ def getInput(filename):
 	return Util.input.LoadInput(Util.input.GetInputFile(__file__, filename))
 
 def _distance(a, b, empty_rows, empty_cols, multiplier):
-	distance = abs(a[0] - b[0]) + abs(a[1] - b[1])
-	longs = len([i for i in empty_rows if i > min(a[0], b[0]) and i < max(a[0], b[0])]) + len([i for i in empty_cols if i > min(a[1], b[1]) and i < max(a[1], b[1])])
+	min_rows = min(a[0], b[0])
+	max_rows = max(a[0], b[0])
+	min_cols = min(a[1], b[1])
+	max_cols = max(a[1], b[1])
+
+	distance = max_rows - min_rows + max_cols - min_cols
+	longs = empty_rows[max_rows] - empty_rows[min_rows] + empty_cols[max_cols] - empty_cols[min_cols]
 	return longs * (multiplier - 1) + distance
 
 def _findStarDistances(galaxy, expansion_multiplier):
 	empty_cols = []
+	current_value = 0
 	for i in range(len(galaxy[0])):
 		if all(galaxy[j][i] == '.' for j in range(len(galaxy[0]))):
-			empty_cols.append(i)
+			current_value += 1
+		empty_cols.append(current_value)
+
 	empty_rows = []
+	current_value = 0
 	for i, values in enumerate(galaxy):
 		if all(j == '.' for j in values):
-			empty_rows.append(i)
+			current_value += 1
+		empty_rows.append(current_value)
 
 	stars = []
 	for i, line in enumerate(galaxy):
