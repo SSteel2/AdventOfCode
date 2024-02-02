@@ -53,32 +53,40 @@ def printTime(times, task):
 		output += f'  | Gold: {times[1] // 100000 / 10000:15.4f}'
 	print(output)
 
-def runSingle(year, day, isOutputTime, isOutputAnswers):
+def runSingle(year, day, isOutputTime, isOutputAnswers, runs_count):
 	results, times = launchSolution(year, day)
+	if runs_count > 1:
+		run_times = times
+		for i in range(1, runs_count):
+			_, times = launchSolution(year, day)
+			run_times = (run_times[0] + times[0], run_times[1] + times[1])
+		times = (run_times[0] / runs_count, run_times[1] / runs_count)
+
 	if isOutputAnswers:
 		printAnswers(results, int(day))
 	if isOutputTime:
 		printTime(times, int(day))
 
-def runAll(year, isOutputTime, isOutputAnswers):
+def runAll(year, isOutputTime, isOutputAnswers, runs_count):
 	days = getAllDays(year)
 	for day in days:
-		runSingle(year, day, isOutputTime, isOutputAnswers)
+		runSingle(year, day, isOutputTime, isOutputAnswers, runs_count)
 
 def main():
 	parser = argparse.ArgumentParser(prog='Advent of Code', description='Advent of Code solution runner')
 	parser.add_argument('year', help='2-digit year number')
 	parser.add_argument('day', help='day number, "all" to run all days')
 	parser.add_argument('-t', '--time', action='store_true', help='output time taken')
+	parser.add_argument('-m', '--multiple-runs', action='store', help='number of runs to make for averaging time taken, useful for very small times (default=1)', default=1, type=int)
 	parser.add_argument('-a', '--answers', action='store_false', help='do not output answers (default=True)', default=True)
 	args = parser.parse_args()
 	if not args.time and not args.answers:
 		print("At least one output mode must be selected. -a and -t options are both false.")
 		return
 	if args.day == 'all':
-		runAll(args.year, args.time, args.answers)
+		runAll(args.year, args.time, args.answers, args.multiple_runs)
 	else:
-		runSingle(args.year, args.day, args.time, args.answers)
+		runSingle(args.year, args.day, args.time, args.answers, args.multiple_runs)
 
 if __name__ == '__main__':
 	main()

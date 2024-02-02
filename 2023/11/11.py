@@ -11,7 +11,7 @@ def _distance(a, b, empty_rows, empty_cols, multiplier):
 
 	distance = max_rows - min_rows + max_cols - min_cols
 	longs = empty_rows[max_rows] - empty_rows[min_rows] + empty_cols[max_cols] - empty_cols[min_cols]
-	return longs * (multiplier - 1) + distance
+	return longs * multiplier + distance
 
 def _findStarDistances(galaxy, expansion_multiplier):
 	empty_cols = []
@@ -35,9 +35,10 @@ def _findStarDistances(galaxy, expansion_multiplier):
 				stars.append((i, j))
 
 	distance_sum = 0
+	multiplier = expansion_multiplier - 1
 	for i in range(len(stars)):
 		for j in range(i + 1, len(stars)):
-			distance_sum += _distance(stars[i], stars[j], empty_rows, empty_cols, expansion_multiplier)
+			distance_sum += _distance(stars[i], stars[j], empty_rows, empty_cols, multiplier)
 	return distance_sum
 
 def silver(input_lines):
