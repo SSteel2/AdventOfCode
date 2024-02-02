@@ -21,6 +21,12 @@ class Frequency:
 	def values(self):
 		return self.counts.values()
 
+	def keys(self):
+		return self.counts.keys()
+
+	def __getitem__(self, key):
+		return self.counts[key]
+
 # tests
 if __name__ == '__main__':
 	print('Frequency tests:')

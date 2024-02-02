@@ -1,6 +1,5 @@
 import random
 import Util.input
-import Util.Frequency
 
 def getInput(filename):
 	return Util.input.LoadInput(Util.input.GetInputFile(__file__, filename))

@@ -10,6 +10,22 @@ def _distance1D(a, b, empty_locations, multiplier):
 	longs = empty_locations[big] - empty_locations[small]
 	return longs * multiplier + distance
 
+def _distances1D(location_frequencies, locations, empty_locations, multiplier):
+	distance_sum = 0
+	for i in range(len(locations)):
+		for j in range(i + 1, len(locations)):
+			distance_sum += (_distance1D(locations[i], locations[j], empty_locations, multiplier) * location_frequencies[locations[i]] * location_frequencies[locations[j]])
+	return distance_sum
+
+def _findEmptyLocations(locations, size):
+	empty_locations = []
+	current_value = 0
+	for i in range(size):
+		if i not in locations:
+			current_value += 1
+		empty_locations.append(current_value)
+	return empty_locations
+
 def _findStarDistances(galaxy, expansion_multiplier):
 	stars_rows = {}
 	stars_cols = {}
@@ -27,29 +43,11 @@ def _findStarDistances(galaxy, expansion_multiplier):
 	stars_rows_keys = list(stars_rows.keys())
 	stars_cols_keys = list(stars_cols.keys())
 
-	empty_cols = []
-	current_value = 0
-	for i in range(len(galaxy[0])):
-		if i not in stars_cols_keys:
-			current_value += 1
-		empty_cols.append(current_value)
+	empty_cols = _findEmptyLocations(stars_cols_keys, len(galaxy[0]))
+	empty_rows = _findEmptyLocations(stars_rows_keys, len(galaxy))
 
-	empty_rows = []
-	current_value = 0
-	for i, values in enumerate(galaxy):
-		if i not in stars_rows_keys:
-			current_value += 1
-		empty_rows.append(current_value)
-
-	distance_sum = 0
 	multiplier = expansion_multiplier - 1
-	for i in range(len(stars_rows_keys)):
-		for j in range(i + 1, len(stars_rows_keys)):
-			distance_sum += (_distance1D(stars_rows_keys[i], stars_rows_keys[j], empty_rows, multiplier) * stars_rows[stars_rows_keys[i]] * stars_rows[stars_rows_keys[j]])
-	for i in range(len(stars_cols_keys)):
-		for j in range(i + 1, len(stars_cols_keys)):
-			distance_sum += (_distance1D(stars_cols_keys[i], stars_cols_keys[j], empty_cols, multiplier) * stars_cols[stars_cols_keys[i]] * stars_cols[stars_cols_keys[j]])
-	return distance_sum
+	return _distances1D(stars_rows, stars_rows_keys, empty_rows, multiplier) + _distances1D(stars_cols, stars_cols_keys, empty_cols, multiplier)
 
 def silver(input_lines):
 	return _findStarDistances(input_lines, 2)
