@@ -71,6 +71,35 @@ def runAll(year, isOutputTime, isOutputAnswers, runs_count):
 	days = getAllDays(year)
 	for day in days:
 		runSingle(year, day, isOutputTime, isOutputAnswers, runs_count)
+		
+def setup(year, day):
+	# create directory
+	directory = os.path.join(os.getcwd(), f'20{year}', f'{int(day):0>2}')
+	if not os.path.isdir(directory):
+		print(f'Folder \'{directory}\' created')
+		os.makedirs(directory)
+	filename = f'{int(day)}.py'
+	full_path = os.path.join(directory, filename)
+	if os.path.isfile(filename):
+		print(f'File \'{full_path}\' already exists')
+		return
+	with open(full_path, 'w') as seed_file:
+		seed_file.write('import Util.input\n')
+		seed_file.write('\n')
+		seed_file.write('def getInput(filename):\n')
+		seed_file.write('	return Util.input.LoadInput(Util.input.GetInputFile(__file__, filename))\n')
+		seed_file.write('\n')
+		seed_file.write('def silver(input_lines):\n')
+		seed_file.write('	pass\n')
+		seed_file.write('\n')
+		seed_file.write('def gold(input_lines):\n')
+		seed_file.write('	pass\n')
+		print(f'File \'{full_path}\' created')
+	filename = f'input.txt'
+	full_path = os.path.join(directory, filename)
+	with open(full_path, 'w') as input_file:
+		input_file.write('')
+		print(f'File \'{full_path}\' created')
 
 def main():
 	parser = argparse.ArgumentParser(prog='Advent of Code', description='Advent of Code solution runner')
@@ -79,7 +108,11 @@ def main():
 	parser.add_argument('-t', '--time', action='store_true', help='output time taken')
 	parser.add_argument('-m', '--multiple-runs', action='store', help='number of runs to make for averaging time taken, useful for very small times (default=1)', default=1, type=int)
 	parser.add_argument('-a', '--answers', action='store_false', help='do not output answers (default=True)', default=True)
+	parser.add_argument('-s', '--setup', action='store_true', help='create folder and initial file for specific day')
 	args = parser.parse_args()
+	if args.setup:
+		setup(args.year, args.day)
+		return
 	if not args.time and not args.answers:
 		print("At least one output mode must be selected. -a and -t options are both false.")
 		return
