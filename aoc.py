@@ -4,6 +4,7 @@ import importlib.util
 import argparse
 import os
 import time
+import requests
 
 def timedExecution(func, input_lines):
 	start_time = time.perf_counter_ns()
@@ -71,6 +72,13 @@ def runAll(year, isOutputTime, isOutputAnswers, runs_count):
 	days = getAllDays(year)
 	for day in days:
 		runSingle(year, day, isOutputTime, isOutputAnswers, runs_count)
+
+def getSessionCookie():
+	filepath = os.getenv("ADVENT_OF_CODE")
+	session_cookie = ''
+	with open(filepath, 'r') as session_file:
+		session_cookie = session_file.read()
+	return session_cookie
 		
 def setup(year, day):
 	# create directory
@@ -97,8 +105,20 @@ def setup(year, day):
 		print(f'File \'{full_path}\' created')
 	filename = f'input.txt'
 	full_path = os.path.join(directory, filename)
+
+	headers = { "User-Agent": "github.com/SSteel2/AdventOfCode by Vytautas.Valiukonis@outlook.com" }
+	url = f'https://adventofcode.com/20{year}/day/{int(day)}/input'
+	response = requests.get(url, cookies={"session": getSessionCookie()}, headers=headers, timeout=20)
+
+	if not response.ok:
+		if response.status_code == 400:
+			print("Session cookie has expired, enter a new one in environment file.")
+			sys.exit(-1)
+		else:
+			response.raise_for_status()
+
 	with open(full_path, 'w') as input_file:
-		input_file.write('')
+		input_file.write(response.text)
 		print(f'File \'{full_path}\' created')
 
 def main():
