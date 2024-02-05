@@ -1,0 +1,5 @@
+Personal Advent of Code solutions
+
+This repo does follow the automation guidelines on the /r/adventofcode community wiki (https://www.reddit.com/r/adventofcode/wiki/faqs/automation). Specifically:
+    Once inputs are downloaded, they are cached locally (aoc.py/setup)
+    The User-Agent header in aoc.py/setup is set to me since I maintain this tool
