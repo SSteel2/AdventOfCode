@@ -14,7 +14,7 @@ def timedExecution(func, input_lines):
 		return None, None
 	return result, end_time - start_time
 
-def launchSolution(year, day):
+def launchSolution(year, day, filename):
 	day_number = int(day)
 
 	full_filename = f'{os.getcwd()}\\20{year}\\{day_number:0>2}\\{str(day_number)}.py'
@@ -22,7 +22,7 @@ def launchSolution(year, day):
 	module = importlib.util.module_from_spec(spec)
 	spec.loader.exec_module(module)
 
-	input_lines = module.getInput('input.txt')
+	input_lines = module.getInput(filename)
 	result_silver, time_silver = timedExecution(module.silver, input_lines)
 	result_gold, time_gold = timedExecution(module.gold, input_lines)
 	return (result_silver, result_gold), (time_silver, time_gold)
@@ -54,12 +54,12 @@ def printTime(times, task):
 		output += f'  | Gold: {times[1] // 100000 / 10000:15.4f}'
 	print(output)
 
-def runSingle(year, day, isOutputTime, isOutputAnswers, runs_count):
-	results, times = launchSolution(year, day)
+def runSingle(year, day, filename, isOutputTime, isOutputAnswers, runs_count):
+	results, times = launchSolution(year, day, filename)
 	if runs_count > 1:
 		run_times = times
 		for i in range(1, runs_count):
-			_, times = launchSolution(year, day)
+			_, times = launchSolution(year, day, filename)
 			run_times = (run_times[0] + times[0], run_times[1] + times[1])
 		times = (run_times[0] / runs_count, run_times[1] / runs_count)
 
@@ -68,10 +68,10 @@ def runSingle(year, day, isOutputTime, isOutputAnswers, runs_count):
 	if isOutputTime:
 		printTime(times, int(day))
 
-def runAll(year, isOutputTime, isOutputAnswers, runs_count):
+def runAll(year, filename, isOutputTime, isOutputAnswers, runs_count):
 	days = getAllDays(year)
 	for day in days:
-		runSingle(year, day, isOutputTime, isOutputAnswers, runs_count)
+		runSingle(year, day, filename, isOutputTime, isOutputAnswers, runs_count)
 
 def getSessionCookie():
 	filepath = os.getenv("ADVENT_OF_CODE")
@@ -129,6 +129,7 @@ def main():
 	parser.add_argument('-m', '--multiple-runs', action='store', help='number of runs to make for averaging time taken, useful for very small times (default=1)', default=1, type=int)
 	parser.add_argument('-a', '--answers', action='store_false', help='do not output answers (default=True)', default=True)
 	parser.add_argument('-s', '--setup', action='store_true', help='create folder and initial file for specific day')
+	parser.add_argument('-f', '--file', action='store', help='specify input file to use for operations (default=input.txt)', default='input.txt')
 	args = parser.parse_args()
 	if args.setup:
 		setup(args.year, args.day)
@@ -137,9 +138,9 @@ def main():
 		print("At least one output mode must be selected. -a and -t options are both false.")
 		return
 	if args.day == 'all':
-		runAll(args.year, args.time, args.answers, args.multiple_runs)
+		runAll(args.year, args.file, args.time, args.answers, args.multiple_runs)
 	else:
-		runSingle(args.year, args.day, args.time, args.answers, args.multiple_runs)
+		runSingle(args.year, args.day, args.file, args.time, args.answers, args.multiple_runs)
 
 if __name__ == '__main__':
 	main()
