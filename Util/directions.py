@@ -15,6 +15,9 @@ InverseDirectionsTable = {
 def Move(position, direction):
 	return tuple(map(sum, zip(position, DirectionsTable[direction])))
 
+def MoveMultiple(position, direction, count):
+	return tuple(map(sum, zip(position, tuple(i * count for i in DirectionsTable[direction]))))
+
 def Convert(graph, conversion_table):
 	new_graph = [[c for c in line] for line in graph]
 	for l, line in enumerate(graph):
