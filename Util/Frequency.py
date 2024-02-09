@@ -27,6 +27,9 @@ class Frequency:
 	def __getitem__(self, key):
 		return self.counts[key]
 
+	def orderedValues(self):
+		return sorted(list(self.counts.values()), reverse=True)
+
 # tests
 if __name__ == '__main__':
 	print('Frequency tests:')
