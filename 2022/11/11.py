@@ -26,16 +26,16 @@ def _parseMonkey(monkey_lines, is_worry_reduced):
 	monkey['items'] = [int(i) for i in monkey_lines[1].split(': ')[1].split(', ')]
 	monkey['operation_params'] = monkey_lines[2].split('= ')[1].split(' ')
 	monkey['test'] = int(monkey_lines[3].split(' ')[-1])
-	monkey['True'] = int(monkey_lines[4].split(' ')[-1])
-	monkey['False'] = int(monkey_lines[5].split(' ')[-1])
+	monkey[True] = int(monkey_lines[4].split(' ')[-1])
+	monkey[False] = int(monkey_lines[5].split(' ')[-1])
 	return monkey_id, monkey
 
 def _parse(input_lines, is_worry_reduced):
 	monkeys = {}
 	monkey_lines = []
-	for i in input_lines:
-		if i != '':
-			monkey_lines.append(i)
+	for line in input_lines:
+		if line != '':
+			monkey_lines.append(line)
 		else:
 			monkey_id, monkey = _parseMonkey(monkey_lines, is_worry_reduced)
 			monkeys[monkey_id] = monkey
@@ -44,21 +44,21 @@ def _parse(input_lines, is_worry_reduced):
 	monkeys[monkey_id] = monkey
 
 	multiplier = 1
-	for i in monkeys:
-		multiplier *= monkeys[i]['test']
-	for i in monkeys:
-		monkeys[i]['operation'] = _createOperation(monkeys[i]['operation_params'], is_worry_reduced, multiplier)
+	for monkey_id in monkeys:
+		multiplier *= monkeys[monkey_id]['test']
+	for monkey_id in monkeys:
+		monkeys[monkey_id]['operation'] = _createOperation(monkeys[monkey_id]['operation_params'], is_worry_reduced, multiplier)
 	return monkeys
 
 def _solve(input_lines, total_rounds, is_worry_reduced):
 	monkeys = _parse(input_lines, is_worry_reduced)
 	inspections = Util.Frequency.Frequency()
-	for r in range(total_rounds):
+	for _ in range(total_rounds):
 		for monkey_id in monkeys:
+			inspections.add(monkey_id, len(monkeys[monkey_id]['items']))
 			for item in monkeys[monkey_id]['items']:
-				inspections.add(monkey_id)
 				new_value = monkeys[monkey_id]['operation'](item)
-				monkeys[monkeys[monkey_id][str(new_value % monkeys[monkey_id]['test'] == 0)]]['items'].append(new_value)
+				monkeys[monkeys[monkey_id][new_value % monkeys[monkey_id]['test'] == 0]]['items'].append(new_value)
 			monkeys[monkey_id]['items'] = []
 	values = inspections.orderedValues()
 	return values[0] * values[1]	

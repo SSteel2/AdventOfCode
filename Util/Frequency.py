@@ -13,10 +13,10 @@ class Frequency:
 	def __repr__(self):
 		return str(self.counts)
 
-	def add(self, value):
+	def add(self, value, count=1):
 		if value not in self.counts:
 			self.counts[value] = 0
-		self.counts[value] += 1
+		self.counts[value] += count
 
 	def values(self):
 		return self.counts.values()
