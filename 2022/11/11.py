@@ -7,11 +7,11 @@ def getInput(filename):
 def _createOperation(members, is_worry_reduced, common_reducer):
 	if is_worry_reduced:
 		if members[1] == '+':
-			return lambda x: ((x + int(members[2])) // 3) % common_reducer
+			return lambda x: ((x + int(members[2])) // 3) % (common_reducer * 3)
 		elif members[1] == '*' and members[0] == members[2] == 'old':
-			return lambda x: ((x * x) // 3) % common_reducer
+			return lambda x: ((x * x) // 3) % (common_reducer * 3)
 		elif members[1] == '*':
-			return lambda x: ((x * int(members[2])) // 3) % common_reducer
+			return lambda x: ((x * int(members[2])) // 3) % (common_reducer * 3)
 	else:
 		if members[1] == '+':
 			return lambda x: (x + int(members[2])) % common_reducer
