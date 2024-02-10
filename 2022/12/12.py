@@ -7,17 +7,17 @@ def getInput(filename):
 	return Util.input.LoadInput(Util.input.GetInputFile(__file__, filename))
 
 def _parse(input_lines):
-	heightmap = [['.' for _ in range(len(input_lines[0]))] for _ in range(len(input_lines))]
+	heightmap = [[0 for _ in range(len(input_lines[0]))] for _ in range(len(input_lines))]
 	for l, line in enumerate(input_lines):
 		for c, col in enumerate(line):
 			if col == 'S':
 				start = (l, c)
-				heightmap[l][c] = 'a'
+				heightmap[l][c] = ord('a')
 			elif col == 'E':
 				end = (l, c)
-				heightmap[l][c] = 'z'
+				heightmap[l][c] = ord('z')
 			else:
-				heightmap[l][c] = col
+				heightmap[l][c] = ord(col)
 	return heightmap, start, end
 
 def _get(matrix, location):
@@ -33,14 +33,10 @@ def _isOutOfBounds(location, input_lines):
 	return location[0] >= len(input_lines) or location[0] < 0 or location[1] >= len(input_lines[0]) or location[1] < 0
 
 def _isClimbPossible(heightmap, current, new_location):
-	current_height = _get(heightmap, current)
-	new_height = _get(heightmap, new_location)
-	return ord(current_height) + 1 >= ord(new_height)
+	return _get(heightmap, current) + 1 >= _get(heightmap, new_location)
 
 def _isClimbPossibleReverse(heightmap, current, new_location):
-	current_height = _get(heightmap, current)
-	new_height = _get(heightmap, new_location)
-	return ord(current_height) <= ord(new_height) + 1
+	return _get(heightmap, current) <= _get(heightmap, new_location) + 1
 
 def _findDistances(input_lines, start, end, climbFunction):
 	distance = [[math.inf for _ in range(len(input_lines[0]))] for _ in range(len(input_lines))]
