@@ -68,10 +68,19 @@ def runSingle(year, day, filename, isOutputTime, isOutputAnswers, runs_count):
 	if isOutputTime:
 		printTime(times, int(day))
 
+	return times
+
 def runAll(year, filename, isOutputTime, isOutputAnswers, runs_count):
 	days = getAllDays(year)
+	global_times = (0, 0)
 	for day in days:
-		runSingle(year, day, filename, isOutputTime, isOutputAnswers, runs_count)
+		times = runSingle(year, day, filename, isOutputTime, isOutputAnswers, runs_count)
+		global_times = (global_times[0] + times[0], global_times[1] + times[1])
+
+	if isOutputTime:
+		print('-' * 67)
+		printTime(global_times, '  ')
+		print(f'\nTotal time taken: {(global_times[0] + global_times[1]) // 100000 / 10000:.4f}')
 
 def getSessionCookie():
 	filepath = os.getenv("ADVENT_OF_CODE")
