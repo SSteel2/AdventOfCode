@@ -31,3 +31,9 @@ def Inverse(direction):
 		return direction
 	else:
 		return InverseDirectionsTable[direction]
+
+def Get(table, position):
+	return table[position[0]][position[1]]
+
+def Set(table, position, value):
+	table[position[0]][position[1]] = value
