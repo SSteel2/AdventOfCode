@@ -75,7 +75,7 @@ def runAll(year, filename, isOutputTime, isOutputAnswers, runs_count):
 	global_times = (0, 0)
 	for day in days:
 		times = runSingle(year, day, filename, isOutputTime, isOutputAnswers, runs_count)
-		global_times = (global_times[0] + times[0], global_times[1] + times[1])
+		global_times = (global_times[0] + (times[0] if times[0] != None else 0), global_times[1] + (times[1] if times[1] != None else 0))
 
 	if isOutputTime:
 		print('-' * 67)
