@@ -109,8 +109,8 @@ def _reorder(indexed_list):
 			if index_value[0] == i:
 				moves = index_value[1]
 				new_index = (j + moves) % (len(indexed_list) - 1)
-				list_removed = indexed_list[:j] + indexed_list[j + 1:]
-				indexed_list = list_removed[:new_index] + [index_value] + list_removed[new_index:]
+				indexed_value = indexed_list.pop(j)
+				indexed_list.insert(new_index, indexed_value)
 				break
 	return indexed_list
 
@@ -137,19 +137,18 @@ def _failedSolution():
 	linked_list.debug()
 	return linked_list.sum_criticals()
 
+def _solve(numbers, iterations):
+	indexed_list = []
+	for i, number in enumerate(numbers):
+		indexed_list.append((i, number))
+	for i in range(iterations):
+		indexed_list = _reorder(indexed_list)
+	return _calculateCriticalSum(indexed_list)	
+
 def silver(input_lines):
 	parsed = Util.input.ParseInputLines(input_lines, _parse)
-	indexed_list = []
-	for i, number in enumerate(parsed):
-		indexed_list.append((i, number))
-	indexed_list = _reorder(indexed_list)
-	return _calculateCriticalSum(indexed_list)
+	return _solve(parsed, 1)
 
 def gold(input_lines):
 	parsed = Util.input.ParseInputLines(input_lines, _parseGold)
-	indexed_list = []
-	for i, number in enumerate(parsed):
-		indexed_list.append((i, number))
-	for i in range(10):
-		indexed_list = _reorder(indexed_list)
-	return _calculateCriticalSum(indexed_list)
+	return _solve(parsed, 10)
