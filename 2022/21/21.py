@@ -45,11 +45,16 @@ def silver(input_lines):
 	_solve(monkeys)
 	return monkeys['root']['value']
 
+inputs_memoization = {}
 def _gatherInputs(name, monkeys):
+	if name in inputs_memoization:
+		return inputs_memoization[name]
 	if 'value' in monkeys[name]:
-		return set([name])
+		inputs_set = set([name])
 	else:
-		return _gatherInputs(monkeys[name]['argument_1'], monkeys) | _gatherInputs(monkeys[name]['argument_2'], monkeys) | set([name])
+		inputs_set = _gatherInputs(monkeys[name]['argument_1'], monkeys) | _gatherInputs(monkeys[name]['argument_2'], monkeys) | set([name])
+	inputs_memoization[name] = inputs_set
+	return inputs_set
 
 def _calculateValueGold(name, monkeys):
 	if 'value' in monkeys[name]:
