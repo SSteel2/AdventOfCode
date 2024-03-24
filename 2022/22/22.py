@@ -40,38 +40,44 @@ def _isOutOfBounds(position, grid):
 	return position[0] < 0 or position[0] >= len(grid) or position[1] < 0 or position[1] >= len(grid[position[0]]) or grid[position[0]][position[1]] == ' '
 
 def _wrapPosition(position, direction, grid):
+	position = Util.directions.Move(position, direction)
 	inverse_direction = Util.directions.Inverse(direction)
 	wrapped_position = Util.directions.MoveMultiple(position, inverse_direction, cell_size)
 	new_position = wrapped_position
 	while not _isOutOfBounds(new_position, grid):
 		wrapped_position = new_position
 		new_position = Util.directions.MoveMultiple(wrapped_position, inverse_direction, cell_size)
-	return wrapped_position
-
-def _move(distance, current_direction, current_position, grid):
-	position = current_position
-	for i in range(distance):
-		old_position = position
-		position = Util.directions.Move(position, current_direction)
-		if _isOutOfBounds(position, grid):
-			position = _wrapPosition(position, current_direction, grid)
-		if Util.directions.Get(grid, position) == '#':
-			return old_position
-	return position
+	return wrapped_position, direction
 
 def _answer(position, direction):
 	return (position[0] + 1) * 1000 + (position[1] + 1) * 4 + ((facings.index(direction) - 1) % 4)
 
-def silver(input_lines):
-	grid, commands = _parse(input_lines)
+def _move(distance, current_direction, current_position, grid, wrap_function):
+	direction = current_direction
+	position = current_position
+	for i in range(distance):
+		old_position = position
+		old_direction = direction
+		position = Util.directions.Move(position, direction)
+		if _isOutOfBounds(position, grid):
+			position, direction = wrap_function(old_position, old_direction, grid)
+		if Util.directions.Get(grid, position) == '#':
+			return old_position, old_direction
+	return position, direction
+
+def _solve(grid, commands, wrap_function):
 	current_position = _getStart(grid)
 	current_direction = 'R'
 	for command in commands:
 		if command[0] == 'move':
-			current_position = _move(command[1], current_direction, current_position, grid)
+			current_position, current_direction = _move(command[1], current_direction, current_position, grid, wrap_function)
 		elif command[0] == 'rotate':
 			current_direction = _rotate(command[1], current_direction)
 	return _answer(current_position, current_direction)
+
+def silver(input_lines):
+	grid, commands = _parse(input_lines)
+	return _solve(grid, commands, _wrapPosition)
 
 Cube = {
 	'z_plus': {'name': 'top', 'inverse': False, 'axis': 'z'},
@@ -104,11 +110,15 @@ def _rotate90deg(vector, normal):
 		return vector
 	return rotations[(rotations.index(vector) + adjustment) % 4]
 
+def _getSides(normal):
+	sides = Rotations[Cube[normal]['axis']]
+	if Cube[normal]['inverse']:
+		sides = sides[::-1]
+	return sides
+
 def _walkCube(current_position, grid, current_normal):
 	global_up = Cube[current_normal]['global_up']
-	sides = Rotations[Cube[current_normal]['axis']]
-	if Cube[current_normal]['inverse']:
-		sides = sides[::-1]
+	sides = _getSides(current_normal)
 	rotation_index = sides.index(global_up)
 
 	for facing_index in range(len(facings)):
@@ -135,12 +145,10 @@ def _findCube(position):
 
 def _getGlobalDirection(local_direction, cube_normal):
 	facing_index = facings.index(local_direction)
-	sides = Rotations[Cube[cube_normal]['axis']]
-	if Cube[cube_normal]['inverse']:
-		sides = sides[::-1]
+	sides = _getSides(cube_normal)
 	return sides[(sides.index(Cube[cube_normal]['global_up']) + facing_index) % 4]
 
-def _wrapPositionGold(old_position, direction, grid):
+def _wrapPositionCube(old_position, direction, grid):
 	old_cube_normal = _findCube(old_position)
 	global_direction = _getGlobalDirection(direction, old_cube_normal)
 	new_cube_normal = global_direction
@@ -150,9 +158,7 @@ def _wrapPositionGold(old_position, direction, grid):
 		exit_coordinate = old_position[1] - Cube[old_cube_normal]['start'][1]
 	if direction == 'D' or direction == 'L':
 		exit_coordinate = cell_size - 1 - exit_coordinate
-	sides = Rotations[Cube[new_cube_normal]['axis']]
-	if Cube[new_cube_normal]['inverse']:
-		sides = sides[::-1]
+	sides = _getSides(new_cube_normal)
 	new_global_direction = InverseNormal[old_cube_normal]
 	new_cube_global_up = Cube[new_cube_normal]['global_up']
 	rotational_difference = (sides.index(new_global_direction) - sides.index(new_cube_global_up)) % 4
@@ -166,27 +172,7 @@ def _wrapPositionGold(old_position, direction, grid):
 		new_position = (cell_size - 1 - exit_coordinate, cell_size - 1)
 	return (new_position[0] + Cube[new_cube_normal]['start'][0], new_position[1] + Cube[new_cube_normal]['start'][1]), facings[rotational_difference]
 
-def _moveGold(distance, current_direction, current_position, grid):
-	direction = current_direction
-	position = current_position
-	for i in range(distance):
-		old_position = position
-		old_direction = direction
-		position = Util.directions.Move(position, direction)
-		if _isOutOfBounds(position, grid):
-			position, direction = _wrapPositionGold(old_position, old_direction, grid)
-		if Util.directions.Get(grid, position) == '#':
-			return old_position, old_direction
-	return position, direction
-
 def gold(input_lines):
 	grid, commands = _parse(input_lines)
 	_constructCube(grid, cell_size)
-	current_position = _getStart(grid)
-	current_direction = 'R'
-	for command in commands:
-		if command[0] == 'move':
-			current_position, current_direction = _moveGold(command[1], current_direction, current_position, grid)
-		elif command[0] == 'rotate':
-			current_direction = _rotate(command[1], current_direction)
-	return _answer(current_position, current_direction)
+	return _solve(grid, commands, _wrapPositionCube)
