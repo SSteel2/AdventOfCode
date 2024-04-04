@@ -19,8 +19,7 @@ directions = ['U', 'D', 'L', 'R']
 direction_rose = [(-1, -1), (-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1)]
 
 def _get_next_postion(ground, current_position, direction_index):
-	# neighbours = [0 if Util.directions.Get(ground, Util.directions.MoveCustom(current_position, i)) == '.' else 1 for i in direction_rose]
-	neighbours = [0 if ground[current_position[0] + i[0]][current_position[1] + i[1]] == '.' else 1 for i in direction_rose]
+	neighbours = [ground[current_position[0] + i[0]][current_position[1] + i[1]] for i in direction_rose]
 	if sum(neighbours) == 0:
 		return current_position
 	for i in range(4):
@@ -55,9 +54,9 @@ def _move(ground, elves, direction_index):
 		else:
 			next_positions.append(position[1])
 	for position in elves:
-		Util.directions.Set(ground, position, '.')
+		Util.directions.Set(ground, position, 0)
 	for position in next_positions:
-		Util.directions.Set(ground, position, '#')
+		Util.directions.Set(ground, position, 1)
 	return next_positions, is_moving
 
 def _calculate_empty_ground(elves):
@@ -75,11 +74,11 @@ def _calculate_empty_ground(elves):
 	return (max_x - min_x + 1) * (max_y - min_y + 1) - total_elves
 
 def _create_ground(ground_dimension, ground_offset, elves):
-	ground = [['.' for i in range(ground_dimension)] for j in range(ground_dimension)]
+	ground = [[0 for i in range(ground_dimension)] for j in range(ground_dimension)]
 	new_elves = []
 	for elf in elves:
 		new_elves.append((elf[0] + ground_offset, elf[1] + ground_offset))
-		ground[elf[0] + ground_offset][elf[1] + ground_offset] = '#'
+		ground[elf[0] + ground_offset][elf[1] + ground_offset] = 1
 	return ground, new_elves
 
 def silver(input_lines):
