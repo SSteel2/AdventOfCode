@@ -18,6 +18,9 @@ def Move(position, direction):
 def MoveMultiple(position, direction, count):
 	return tuple(map(sum, zip(position, tuple(i * count for i in DirectionsTable[direction]))))
 
+def MoveCustom(position, custom_direction):
+	return tuple(map(sum, zip(position, custom_direction)))
+
 def Convert(graph, conversion_table):
 	new_graph = [[c for c in line] for line in graph]
 	for l, line in enumerate(graph):
