@@ -5,6 +5,7 @@ import argparse
 import os
 import time
 import requests
+import sys
 
 def timedExecution(func, input_lines):
 	start_time = time.perf_counter_ns()

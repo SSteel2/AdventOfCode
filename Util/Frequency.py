@@ -1,4 +1,6 @@
 class Frequency:
+	'''Wrapper class for dict. Meant for quickly counting frequencies of items.'''
+
 	def __init__(self):
 		self.counts = {}
 
@@ -27,6 +29,9 @@ class Frequency:
 	def __getitem__(self, key):
 		return self.counts[key]
 
+	def __contains__(self, item):
+		return item in self.counts
+
 	def orderedValues(self):
 		return sorted(list(self.counts.values()), reverse=True)
 
@@ -44,3 +49,4 @@ if __name__ == '__main__':
 	f.add(3)
 	f.add(3)
 	print(f)
+	print(3 in f)
