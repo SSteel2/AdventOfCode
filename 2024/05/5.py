@@ -15,9 +15,9 @@ def _parse(input_lines):
 		if is_first_parsing_stage:
 			pages = instruction.split('|')
 			if int(pages[0]) not in rules:
-				rules[int(pages[0])] = [int(pages[1])]
+				rules[int(pages[0])] = set([int(pages[1])])
 			else:
-				rules[int(pages[0])].append(int(pages[1]))
+				rules[int(pages[0])].add(int(pages[1]))
 		else:
 			updates.append([int(i) for i in instruction.split(',')])
 	return rules, updates
@@ -44,7 +44,7 @@ def _make_rule_adhearing(update, rules):
 def _quickselect(pages, index, rules):
 	'''This is a really cool O(n) median selection algorithm. It actually selects the k-th largest element in a list.
 	More information about it: https://rcoh.me/posts/linear-time-median-finding/
-	Unfortunately, since the lists are really small a standard sort approach works ~0.0038s faster in this case.
+	Unfortunately, since the lists are really small a standard sort approach works ~0.0015s faster in this case.
 	Leaving this in here in case I ever need something like it.
 	'''
 	if len(pages) == 1:
