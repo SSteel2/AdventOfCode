@@ -11,15 +11,13 @@ def _find_start(input_lines):
 				return (line_num, col_num), 'U'
 
 def _get_next(position, direction, grid):
-	next_position = Util.directions.Move(position, direction)
-	if Util.directions.IsOutOfBounds(grid, next_position):
-		return None, None
-	while Util.directions.Get(grid, next_position) == '#':
-		direction = Util.directions.RotateClockwise(direction)
+	while True:
 		next_position = Util.directions.Move(position, direction)
-		if Util.directions.IsOutOfBounds(grid, next_position):
+		if (symbol := Util.directions.Get(grid, next_position)) == '%':
 			return None, None
-	return next_position, direction
+		if symbol != '#':
+			return next_position, direction
+		direction = Util.directions.RotateClockwise(direction)
 
 def _count_visited(grid):
 	count = 0
@@ -30,8 +28,8 @@ def _count_visited(grid):
 	return count
 
 def silver(input_lines):
-	position, direction = _find_start(input_lines)
-	grid = [[col for col in line] for line in input_lines]
+	grid = Util.directions.PadTable(input_lines, 1, '%')
+	position, direction = _find_start(grid)
 	Util.directions.Set(grid, position, 'X')
 	position, direction = _get_next(position, direction, grid)
 	while position != None:
@@ -39,6 +37,34 @@ def silver(input_lines):
 		position, direction = _get_next(position, direction, grid)
 	return _count_visited(grid)
 
+def _is_loop_ahead(position, direction, grid, global_visited):
+	position, direction = _get_next(position, direction, grid)
+	local_visited = set()
+	while position != None:
+		current_vector = (position, direction)
+		if current_vector in global_visited or current_vector in local_visited:
+			return True
+		local_visited.add(current_vector)
+		position, direction = _get_next(position, direction, grid)
+	return False
+
 def gold(input_lines):
-	# man reikia trackinti visited cells
-	pass
+	grid = Util.directions.PadTable(input_lines, 1, '%')
+	position, direction = _find_start(grid)
+	possible_loops = 0
+	global_visited = set()
+
+	while True:
+		global_visited.add((position, direction))
+		Util.directions.Set(grid, position, 'X')
+		next_position, next_direction = _get_next(position, direction, grid)
+		if next_position == None:
+			break
+		if Util.directions.Get(grid, next_position) != 'X':
+			Util.directions.Set(grid, next_position, '#')
+			if _is_loop_ahead(position, direction, grid, global_visited):
+				possible_loops += 1
+			Util.directions.Set(grid, next_position, '.')
+		position, direction = next_position, next_direction
+
+	return possible_loops

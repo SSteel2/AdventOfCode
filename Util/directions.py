@@ -18,7 +18,7 @@ ClockwiseRotations = ['U', 'R', 'D', 'L']
 # tuple(map(sum, zip(position, DirectionsTable[direction])))
 
 def Move(position, direction):
-	return tuple(map(sum, zip(position, DirectionsTable[direction])))
+	return (position[0] + DirectionsTable[direction][0], position[1] + DirectionsTable[direction][1])
 
 def MoveMultiple(position, direction, count):
 	return tuple(map(sum, zip(position, tuple(i * count for i in DirectionsTable[direction]))))
@@ -51,3 +51,15 @@ def Set(table, position, value):
 
 def IsOutOfBounds(table, position):
 	return position[0] >= len(table) or position[0] < 0 or position[1] >= len(table[0]) or position[1] < 0
+
+def PadTable(table, pad_count, pad_symbol):
+	padded_table = [[pad_symbol for i in range(len(table[0]) + pad_count * 2)] for j in range(len(table) + pad_count * 2)]
+	for line_num, line in enumerate(table):
+		for col_num, col in enumerate(line):
+			padded_table[line_num + pad_count][col_num + pad_count] = col
+	return padded_table
+
+def PrintTable(table):
+	'''Debugging helper'''
+	for line in table:
+		print(''.join(line))
