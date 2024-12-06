@@ -12,6 +12,8 @@ InverseDirectionsTable = {
 	'L': 'R',
 }
 
+ClockwiseRotations = ['U', 'R', 'D', 'L']
+
 # This line below is the coolest way to move in a grid, but unfortunately it is significantly slower than just using simple addition
 # tuple(map(sum, zip(position, DirectionsTable[direction])))
 
@@ -38,8 +40,14 @@ def Inverse(direction):
 	else:
 		return InverseDirectionsTable[direction]
 
+def RotateClockwise(direction):
+	return ClockwiseRotations[(ClockwiseRotations.index(direction) + 1) % len(ClockwiseRotations)]
+
 def Get(table, position):
 	return table[position[0]][position[1]]
 
 def Set(table, position, value):
 	table[position[0]][position[1]] = value
+
+def IsOutOfBounds(table, position):
+	return position[0] >= len(table) or position[0] < 0 or position[1] >= len(table[0]) or position[1] < 0
