@@ -59,6 +59,14 @@ def PadTable(table, pad_count, pad_symbol):
 			padded_table[line_num + pad_count][col_num + pad_count] = col
 	return padded_table
 
+def Count(table, value):
+	count = 0
+	for line in table:
+		for col in line:
+			if col == value:
+				count += 1
+	return count
+
 def PrintTable(table):
 	'''Debugging helper'''
 	for line in table:

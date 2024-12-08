@@ -19,14 +19,6 @@ def _get_next(position, direction, grid):
 			return next_position, direction
 		direction = Util.directions.RotateClockwise(direction)
 
-def _count_visited(grid):
-	count = 0
-	for line in grid:
-		for col in line:
-			if col == 'X':
-				count += 1
-	return count
-
 def silver(input_lines):
 	grid = Util.directions.PadTable(input_lines, 1, '%')
 	position, direction = _find_start(grid)
@@ -35,7 +27,7 @@ def silver(input_lines):
 	while position != None:
 		Util.directions.Set(grid, position, 'X')
 		position, direction = _get_next(position, direction, grid)
-	return _count_visited(grid)
+	return Util.directions.Count(grid, 'X')
 
 def _is_loop_ahead(position, direction, grid, global_visited):
 	position, direction = _get_next(position, direction, grid)

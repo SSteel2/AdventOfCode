@@ -15,14 +15,6 @@ def _parse(input_lines):
 					antennae[col] = [(line_num, col_num)]
 	return antennae
 
-def _count_antinodes(grid):
-	count = 0
-	for line in grid:
-		for col in line:
-			if col == 'X':
-				count += 1
-	return count
-
 def _place_antinode_silver(grid, antenna, vector):
 	antinode = (antenna[0] + vector[0], antenna[1] + vector[1])
 	if not Util.directions.IsOutOfBounds(grid, antinode):
@@ -45,7 +37,7 @@ def _solution(input_lines, placement_function):
 		for index1 in range(len(antennae[antenna])):
 			for index2 in range(index1 + 1, len(antennae[antenna])):
 				placement_function(antinodes_grid, antennae[antenna][index1], antennae[antenna][index2])
-	return _count_antinodes(antinodes_grid)
+	return Util.directions.Count(antinodes_grid, 'X')
 
 def silver(input_lines):
 	return _solution(input_lines, lambda grid, antenna1, antenna2: _place_antinodes(grid, antenna1, antenna2, _place_antinode_silver))

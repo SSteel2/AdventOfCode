@@ -46,14 +46,6 @@ def _moveBeam(current_pos, direction, energy, input_lines):
 		else:
 			return [(new_pos[0], new_pos[1], 'R'), (new_pos[0], new_pos[1], 'L')]
 
-def _countEnergy(energy):
-	count = 0
-	for i in energy:
-		for j in i:
-			if j == '#':
-				count += 1
-	return count
-
 def _launchBeam(start_beam, energy, input_lines):
 	visited_beams = []
 	current_beams = [start_beam]
@@ -68,7 +60,7 @@ def _launchBeam(start_beam, energy, input_lines):
 def silver(input_lines):
 	energy = [['.' for _ in input_lines[0]] for _ in input_lines]
 	_launchBeam((0, -1, 'R'), energy, input_lines)
-	return _countEnergy(energy)
+	return Util.directions.Count(energy, '#')
 
 def gold(input_lines):
 	possible_starts = []
@@ -82,5 +74,5 @@ def gold(input_lines):
 	for start in possible_starts:
 		energy = [['.' for _ in input_lines[0]] for _ in input_lines]
 		_launchBeam(start, energy, input_lines)
-		counts.append(_countEnergy(energy))
+		counts.append(Util.directions.Count(energy, '#'))
 	return max(counts)
