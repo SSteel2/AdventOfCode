@@ -8,36 +8,29 @@ def _parseLine(line):
 	goal = int(line.split(': ')[0])
 	return goal, numbers
 
-def __product(numbers):
-	prod = 1
-	for i in numbers:
-		prod *= i
-	return prod
+def _remove_concatennation(goal, number):
+	while number > 0:
+		if goal % 10 == number % 10:
+			goal //= 10
+			number //= 10
+		else:
+			return None
+	return goal
 
 def _is_number_matching_goal(goal, numbers, different_operations):
-	if different_operations == 2:
-		max_value = __product(numbers)
-		if max_value < goal:
-			return False
+	if len(numbers) == 0 and goal == 0:
+		return True
+	elif (len(numbers) > 0 and goal <= 0) or (len(numbers) == 0 and goal != 0):
+		return False
 
-	max_permutations = different_operations ** (len(numbers) - 1)
-	for operation_permutation in range(max_permutations):
-		actual_sum = numbers[0]
-		current_operation_permutation = operation_permutation
-		for index, number in enumerate(numbers[1:]):
-			current_operation = current_operation_permutation % different_operations
-			current_operation_permutation //= different_operations
-			if current_operation == 0:
-				actual_sum *= number
-			elif current_operation == 1:
-				actual_sum += number
-			elif current_operation == 2:
-				actual_sum = int(str(actual_sum) + str(number))
-			if actual_sum > goal:
-				break
-		if actual_sum == goal:
+	if different_operations == 3:
+		if (result := _remove_concatennation(goal, numbers[-1])) != None:
+			if _is_number_matching_goal(result, numbers[:-1], different_operations):
+				return True
+	if goal % numbers[-1] == 0:
+		if _is_number_matching_goal(goal // numbers[-1], numbers[:-1], different_operations):
 			return True
-	return False
+	return _is_number_matching_goal(goal - numbers[-1], numbers[:-1], different_operations)
 
 def _solution(input_lines, different_operations):
 	tasks = Util.input.ParseInputLines(input_lines, _parseLine)
