@@ -26,6 +26,9 @@ def MoveMultiple(position, direction, count):
 def MoveCustom(position, custom_direction):
 	return (position[0] + custom_direction[0], position[1] + custom_direction[1])
 
+def MoveMultipleCustom(position, custom_direction, count):
+	return (position[0] + custom_direction[0] * count, position[1] + custom_direction[1] * count)
+
 def Convert(graph, conversion_table):
 	new_graph = [[c for c in line] for line in graph]
 	for l, line in enumerate(graph):
