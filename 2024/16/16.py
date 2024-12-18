@@ -163,6 +163,6 @@ def gold(input_lines):
 		next_location = Util.directions.Move(end, direction)
 		_mark_fastest_path(grid, next_location, direction, best_distance - 1, start, nodes, start)
 
-	Util.directions.PrintTable(grid)
+	# Util.directions.PrintTable(grid)
 
 	return Util.directions.Count(grid, 'X')
