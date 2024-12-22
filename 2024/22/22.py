@@ -16,10 +16,10 @@ def _secret(number, max_iteration):
 		number = _next_secret(number)
 	return number
 
-def _change_to_bananas_dict(number, max_iteration):
-	change_to_bananas = {}
+def _change_to_bananas_dict(number, max_iteration, current_dict):
 	current = 0
 	last_price = number % 10
+	visited_keys = set()
 	differences = [last_price]
 	for i in range(max_iteration):
 		number = _next_secret(number)
@@ -29,9 +29,12 @@ def _change_to_bananas_dict(number, max_iteration):
 		if len(differences) < 4:
 			continue
 		key = tuple(differences[-4:])
-		if key not in change_to_bananas:
-			change_to_bananas[key] = price
-	return change_to_bananas
+		if key not in visited_keys:
+			if key not in current_dict:
+				current_dict[key] = price
+			else:
+				current_dict[key] += price
+		visited_keys.add(key)
 
 def silver(input_lines):
 	numbers = Util.input.ParseInputLines(input_lines, _parseLine)
@@ -40,26 +43,9 @@ def silver(input_lines):
 		score += _secret(number, 2000)
 	return score
 
-def _possible_answer_generator():
-	for i in range(-9, 10):
-		for j in range(-9, 10):
-			for k in range(-9, 10):
-				for l in range(-9, 10):
-					yield (i, j, k, l)
-
 def gold(input_lines):
 	numbers = Util.input.ParseInputLines(input_lines, _parseLine)
-	change_to_bananas = []
+	change_to_bananas = {}
 	for number in numbers:
-		change_to_bananas.append(_change_to_bananas_dict(number, 2000))
-	max_score = -1
-	possible_answer = _possible_answer_generator()
-	for answer in possible_answer:
-		score = 0
-		for i in change_to_bananas:
-			if answer in i:
-				score += i[answer]
-		if score > max_score:
-			max_score = score
-	return max_score
-
+		_change_to_bananas_dict(number, 2000, change_to_bananas)
+	return max(change_to_bananas.values())
