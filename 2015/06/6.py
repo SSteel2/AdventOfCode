@@ -24,26 +24,28 @@ def _apply(grid, x1, x2, y1, y2, command):
 		for y in range(y1, y2 + 1):
 			grid[x][y] = command(grid[x][y])
 
+def _apply_instructions(grid, instructions, command_table):
+	for instruction in instructions:
+		_apply(grid, instruction['x1'], instruction['x2'], instruction['y1'], instruction['y2'], command_table[instruction['command']])
+
 def silver(input_lines):
 	instructions = _parse(input_lines)
 	grid = [[False for _ in range(1000)] for _ in range(1000)]
-	for instruction in instructions:
-		if instruction['command'] == 'on':
-			_apply(grid, instruction['x1'], instruction['x2'], instruction['y1'], instruction['y2'], lambda x: True)
-		elif instruction['command'] == 'off':
-			_apply(grid, instruction['x1'], instruction['x2'], instruction['y1'], instruction['y2'], lambda x: False)
-		elif instruction['command'] == 'toggle':
-			_apply(grid, instruction['x1'], instruction['x2'], instruction['y1'], instruction['y2'], lambda x: not x)
+	command_table = {
+		'on': lambda x: True,
+		'off': lambda x: False,
+		'toggle': lambda x: not x
+	}
+	_apply_instructions(grid, instructions, command_table)
 	return Util.directions.Count(grid, True)
 
 def gold(input_lines):
 	instructions = _parse(input_lines)
 	grid = [[0 for _ in range(1000)] for _ in range(1000)]
-	for instruction in instructions:
-		if instruction['command'] == 'on':
-			_apply(grid, instruction['x1'], instruction['x2'], instruction['y1'], instruction['y2'], lambda x: x + 1)
-		elif instruction['command'] == 'off':
-			_apply(grid, instruction['x1'], instruction['x2'], instruction['y1'], instruction['y2'], lambda x: x + 1 if x > 0 else 0)
-		elif instruction['command'] == 'toggle':
-			_apply(grid, instruction['x1'], instruction['x2'], instruction['y1'], instruction['y2'], lambda x: x + 2)
+	command_table = {
+		'on': lambda x: x + 1,
+		'off': lambda x: x + 1 if x > 0 else 0,
+		'toggle': lambda x: x + 2
+	}
+	_apply_instructions(grid, instructions, command_table)
 	return sum([sum(i) for i in grid])
