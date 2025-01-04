@@ -5,12 +5,7 @@ class Frequency:
 		self.counts = {}
 
 	def __str__(self):
-		items = list(self.counts.items())
-		sorted_items = sorted(items, key=lambda x: x[1], reverse=True)
-		constructed_str = ''
-		for i in sorted_items:
-			constructed_str += f'{i[0]}: {i[1]}\n'
-		return constructed_str
+		return self.orderedByValue()
 
 	def __repr__(self):
 		return str(self.counts)
@@ -35,6 +30,20 @@ class Frequency:
 	def orderedValues(self):
 		return sorted(list(self.counts.values()), reverse=True)
 
+	def orderedByValue(self):
+		sorted_items = sorted(list(self.counts.items()), key=lambda x: x[1], reverse=True)
+		return self._constructString(sorted_items)		
+
+	def orderedByKey(self):
+		sorted_items = sorted(list(self.counts.items()), key=lambda x: x[0])
+		return self._constructString(sorted_items)
+
+	def _constructString(self, items):
+		constructed_str = ''
+		for i in items:
+			constructed_str += f'{i[0]}: {i[1]}\n'
+		return constructed_str
+
 # tests
 if __name__ == '__main__':
 	print('Frequency tests:')
@@ -48,5 +57,9 @@ if __name__ == '__main__':
 	f.add(3)
 	f.add(3)
 	f.add(3)
-	print(f)
+	print('Contains check (should be true)')
 	print(3 in f)
+	print('Order by value')
+	print(f)
+	print('Order by key')
+	print(f.orderedByKey())
