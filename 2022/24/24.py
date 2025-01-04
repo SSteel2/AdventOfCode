@@ -46,9 +46,6 @@ def _get_open_slot(ground, line_num):
 		if col == '.':
 			return (line_num, i)
 
-def _manhattanDistance(point1, point2):
-	return abs(point1[0] - point2[0]) + abs(point1[1] - point2[1])
-
 def _is_position_valid(position, time, ground, vertical_blizzard_lines, horizontal_blizzard_lines):
 	if Util.directions.Get(ground, position) == '#':
 		return False
@@ -60,7 +57,7 @@ def _is_position_valid(position, time, ground, vertical_blizzard_lines, horizont
 
 def _find_best_path(ground, vertical_blizzard_lines, horizontal_blizzard_lines, start_position, end_position, start_time):
 	next_positions = Util.PriorityQueue.PriorityQueue()
-	next_positions.append(_manhattanDistance(start_position, end_position), (start_position, []))
+	next_positions.append(Util.directions.ManhattanDistance(start_position, end_position), (start_position, []))
 	visited = set()
 	while len(next_positions) > 0:
 		current_position, current_path = next_positions.pop()
@@ -72,10 +69,10 @@ def _find_best_path(ground, vertical_blizzard_lines, horizontal_blizzard_lines, 
 		for direction in Util.directions.DirectionsTable:
 			next_position = Util.directions.Move(current_position, direction)
 			if _is_position_valid(next_position, start_time + current_length + 1, ground, vertical_blizzard_lines, horizontal_blizzard_lines):
-				next_positions.append(_manhattanDistance(current_position, end_position) + current_length + 1, (next_position, current_path + [direction]))
+				next_positions.append(Util.directions.ManhattanDistance(current_position, end_position) + current_length + 1, (next_position, current_path + [direction]))
 		# waiting
 		if _is_position_valid(current_position, start_time + current_length + 1, ground, vertical_blizzard_lines, horizontal_blizzard_lines):
-			next_positions.append(_manhattanDistance(current_position, end_position) + current_length + 1, (current_position, current_path + ['_']))
+			next_positions.append(Util.directions.ManhattanDistance(current_position, end_position) + current_length + 1, (current_position, current_path + ['_']))
 		visited.add((current_position, current_length))
 
 def _prepare(input_lines):

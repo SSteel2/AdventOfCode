@@ -1,5 +1,6 @@
 import Util.input
 import Util.ranges
+import Util.directions
 import math
 
 def getInput(filename):
@@ -13,9 +14,6 @@ def _parse(line):
 	beacon_y = int(split_line[4])
 	return {'sensor': (sensor_y, sensor_x), 'beacon': (beacon_y, beacon_x)}
 
-def _manhattanDistance(point1, point2):
-	return abs(point1[0] - point2[0]) + abs(point1[1] - point2[1])
-
 def silver(input_lines):
 	sensors = Util.input.ParseInputLines(input_lines, _parse)
 	test_location_y = 2000000
@@ -24,7 +22,7 @@ def silver(input_lines):
 	for sensor in sensors:
 		if sensor['beacon'][0] == test_location_y:
 			beacons_at_test_location.add(sensor['beacon'])
-		distance = _manhattanDistance(sensor['sensor'], sensor['beacon'])
+		distance = Util.directions.ManhattanDistance(sensor['sensor'], sensor['beacon'])
 		distance_to_test_location = abs(sensor['sensor'][0] - test_location_y)
 		remaining_distance = distance - distance_to_test_location
 		if remaining_distance < 0:
@@ -36,11 +34,11 @@ def silver(input_lines):
 def gold(input_lines):
 	sensors = Util.input.ParseInputLines(input_lines, _parse)
 	for sensor in sensors:
-		sensor['beacon_distance'] = _manhattanDistance(sensor['sensor'], sensor['beacon'])
+		sensor['beacon_distance'] = Util.directions.ManhattanDistance(sensor['sensor'], sensor['beacon'])
 	critical_sensors = []
 	for i in range(len(sensors)):
 		for j in range(i + 1, len(sensors)):
-			distance = _manhattanDistance(sensors[i]['sensor'], sensors[j]['sensor'])
+			distance = Util.directions.ManhattanDistance(sensors[i]['sensor'], sensors[j]['sensor'])
 			if distance - sensors[i]['beacon_distance'] - sensors[j]['beacon_distance'] == 2:
 				critical_sensors.append(sensors[i])
 				critical_sensors.append(sensors[j])
@@ -73,6 +71,6 @@ def gold(input_lines):
 
 	left_leaning = critical_sensors[lowest_index]['sensor'][1] > critical_sensors[highest_index]['sensor'][1]
 	missing_beacon = (critical_sensors[lowest_index]['sensor'][0] + critical_sensors[lowest_index]['beacon_distance'] + 1, critical_sensors[lowest_index]['sensor'][1])
-	distance_missing = (_manhattanDistance(missing_beacon, critical_sensors[left_index]['sensor']) - critical_sensors[left_index]['beacon_distance'] - 1) // 2
+	distance_missing = (Util.directions.ManhattanDistance(missing_beacon, critical_sensors[left_index]['sensor']) - critical_sensors[left_index]['beacon_distance'] - 1) // 2
 	missing_beacon = (missing_beacon[0] - distance_missing, missing_beacon[1] - distance_missing * (1 if left_leaning else -1))
 	return missing_beacon[1] * 4000000 + missing_beacon[0]

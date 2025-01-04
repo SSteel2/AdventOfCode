@@ -12,9 +12,6 @@ def _parseLine(line):
 	split_line = line.split(',')
 	return (int(split_line[0]), int(split_line[1]))
 
-def _manhattan_distance(a, b):
-	return abs(a[0] - b[0]) + abs(a[1] - b[1])
-
 def _find_shortest_path(grid, start, end):
 	temp_grid = [[i for i in j] for j in grid]
 	queue = Util.PriorityQueue.PriorityQueue()
@@ -29,7 +26,7 @@ def _find_shortest_path(grid, start, end):
 			if Util.directions.IsOutOfBounds(temp_grid, new_location):
 				continue
 			if Util.directions.Get(temp_grid, new_location) == '.':
-				queue.append(len(current[1]) + 1 + _manhattan_distance(new_location, end), (new_location, current[1] + [new_location]))
+				queue.append(len(current[1]) + 1 + Util.directions.ManhattanDistance(new_location, end), (new_location, current[1] + [new_location]))
 	return None
 
 def silver(input_lines):

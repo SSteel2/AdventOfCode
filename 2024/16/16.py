@@ -12,9 +12,6 @@ def _find(grid, marker):
 			if col == marker:
 				return (line_num, col_num)
 
-def _manhattan_distance(a, b):
-	return abs(a[0] - b[0]) + abs(a[1] - b[1])
-
 def _get_next_cell(position, grid, direction):
 	# gets next cell in traversal path
 	for current_direction in Util.directions.DirectionsTable:
@@ -70,7 +67,7 @@ def silver(input_lines):
 	best_distance = math.inf
 	nodes = {start: {'distance': 0, 'facing': 'R'}}
 	queue = Util.PriorityQueue.PriorityQueue()
-	queue.append(_manhattan_distance(start, end), start)
+	queue.append(Util.directions.ManhattanDistance(start, end), start)
 	while len(queue) > 0:
 		current = queue.pop()
 		if nodes[current]['distance'] > best_distance:
@@ -85,7 +82,7 @@ def silver(input_lines):
 					if nodes[next_node['position']]['distance'] < best_distance:
 						best_distance = nodes[next_node['position']]['distance']
 				else:
-					queue.append(next_distance + _manhattan_distance(next_node['position'], end), next_node['position'])
+					queue.append(next_distance + Util.directions.ManhattanDistance(next_node['position'], end), next_node['position'])
 	return best_distance
 
 def _add_node_distances(node1, node2):
@@ -135,7 +132,7 @@ def gold(input_lines):
 	best_distance = math.inf
 	nodes = {start: {'distance': 0, 'facing': 'R'}}
 	queue = Util.PriorityQueue.PriorityQueue()
-	queue.append(_manhattan_distance(start, end), start)
+	queue.append(Util.directions.ManhattanDistance(start, end), start)
 	while len(queue) > 0:
 		current = queue.pop()
 		if nodes[current]['distance'] > best_distance:
@@ -150,7 +147,7 @@ def gold(input_lines):
 					if nodes[next_node['position']]['distance'] < best_distance:
 						best_distance = nodes[next_node['position']]['distance']
 				else:
-					queue.append(next_distance + _manhattan_distance(next_node['position'], end), next_node['position'])
+					queue.append(next_distance + Util.directions.ManhattanDistance(next_node['position'], end), next_node['position'])
 
 	# for i in nodes:
 	# 	print(i, nodes[i])

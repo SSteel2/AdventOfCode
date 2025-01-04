@@ -26,9 +26,6 @@ def _get(matrix, location):
 def _set(matrix, location, value):
 	matrix[location[0]][location[1]] = value
 
-def _manhattanDistance(point1, point2):
-	return abs(point1[0] - point2[0]) + abs(point1[1] - point2[1])
-
 def _isOutOfBounds(location, input_lines):
 	return location[0] >= len(input_lines) or location[0] < 0 or location[1] >= len(input_lines[0]) or location[1] < 0
 
@@ -42,7 +39,7 @@ def _findDistances(input_lines, start, end, climbFunction):
 	distance = [[math.inf for _ in range(len(input_lines[0]))] for _ in range(len(input_lines))]
 	_set(distance, start, 0)
 	queue = Util.PriorityQueue.PriorityQueue()
-	queue.append(_manhattanDistance(start, end), start)
+	queue.append(Util.directions.ManhattanDistance(start, end), start)
 	while len(queue) > 0:
 		current = queue.pop()
 		for direction in Util.directions.DirectionsTable:
@@ -53,7 +50,7 @@ def _findDistances(input_lines, start, end, climbFunction):
 			if new_distance >= _get(distance, new_location):
 				continue
 			_set(distance, new_location, new_distance)
-			estimate = _manhattanDistance(new_location, end)
+			estimate = Util.directions.ManhattanDistance(new_location, end)
 			queue.append(new_distance + estimate, new_location)
 	return distance
 

@@ -29,6 +29,9 @@ def MoveCustom(position, custom_direction):
 def MoveMultipleCustom(position, custom_direction, count):
 	return (position[0] + custom_direction[0] * count, position[1] + custom_direction[1] * count)
 
+def ManhattanDistance(start_position, end_position):
+	return abs(start_position[0] - end_position[0]) + abs(start_position[1] - end_position[1])
+
 def Convert(graph, conversion_table):
 	new_graph = [[c for c in line] for line in graph]
 	for l, line in enumerate(graph):
