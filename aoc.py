@@ -98,23 +98,27 @@ def setup(year, day):
 		os.makedirs(directory)
 	filename = f'{int(day)}.py'
 	full_path = os.path.join(directory, filename)
-	if os.path.isfile(filename):
+	if os.path.isfile(full_path):
 		print(f'File \'{full_path}\' already exists')
-		return
-	with open(full_path, 'w') as seed_file:
-		seed_file.write('import Util.input\n')
-		seed_file.write('\n')
-		seed_file.write('def getInput(filename):\n')
-		seed_file.write('	return Util.input.LoadInput(Util.input.GetInputFile(__file__, filename))\n')
-		seed_file.write('\n')
-		seed_file.write('def silver(input_lines):\n')
-		seed_file.write('	pass\n')
-		seed_file.write('\n')
-		seed_file.write('def gold(input_lines):\n')
-		seed_file.write('	pass\n')
-		print(f'File \'{full_path}\' created')
+	else:
+		with open(full_path, 'w') as seed_file:
+			seed_file.write('import Util.input\n')
+			seed_file.write('\n')
+			seed_file.write('def getInput(filename):\n')
+			seed_file.write('	return Util.input.LoadInput(Util.input.GetInputFile(__file__, filename))\n')
+			seed_file.write('\n')
+			seed_file.write('def silver(input_lines):\n')
+			seed_file.write('	pass\n')
+			seed_file.write('\n')
+			seed_file.write('def gold(input_lines):\n')
+			seed_file.write('	pass\n')
+			print(f'File \'{full_path}\' created')
+
 	filename = f'input.txt'
 	full_path = os.path.join(directory, filename)
+	if os.path.isfile(full_path):
+		print(f'File \'{full_path}\' already exists')
+		return
 
 	headers = { "User-Agent": "github.com/SSteel2/AdventOfCode by Vytautas.Valiukonis@outlook.com" }
 	url = f'https://adventofcode.com/20{year}/day/{int(day)}/input'
