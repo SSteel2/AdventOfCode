@@ -15,6 +15,14 @@ class Frequency:
 			self.counts[value] = 0
 		self.counts[value] += count
 
+	def merge(self, other):
+		'''Merges with another frequency counter'''
+		for key in other.keys():
+			if key in self.counts:
+				self.counts[key] += other[key]
+			else:
+				self.counts[key] = other[key]
+
 	def values(self):
 		return self.counts.values()
 
