@@ -76,4 +76,4 @@ def Count(table, value):
 def PrintTable(table):
 	'''Debugging helper'''
 	for line in table:
-		print(''.join(line))
+		print(''.join([str(i) for i in line]))
