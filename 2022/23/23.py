@@ -15,22 +15,19 @@ def _parse(input_lines):
 
 directions = ['U', 'D', 'L', 'R']
 
-# directions in circle starting from UL and continuing clockwise
-direction_rose = [(-1, -1), (-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1)]
-
 def _get_next_postion(ground, current_position, direction_index):
-	neighbours = [ground[current_position[0] + i[0]][current_position[1] + i[1]] for i in direction_rose]
+	neighbours = [Utils.directions.Get(ground, Utils.directions.Move(current_position, i)) for i in Util.directions.DirectionsTableDiagonals]
 	if sum(neighbours) == 0:
 		return current_position
 	for i in range(4):
 		current_direction = directions[(direction_index + i) % 4]
-		if current_direction == 'U' and neighbours[0] + neighbours[1] + neighbours[2] == 0:
+		if current_direction == 'U' and neighbours[7] + neighbours[0] + neighbours[1] == 0:
 			return Util.directions.Move(current_position, current_direction)
-		elif current_direction == 'R' and neighbours[2] + neighbours[3] + neighbours[4] == 0:
+		elif current_direction == 'R' and neighbours[1] + neighbours[2] + neighbours[3] == 0:
 			return Util.directions.Move(current_position, current_direction)
-		elif current_direction == 'D' and neighbours[4] + neighbours[5] + neighbours[6] == 0:
+		elif current_direction == 'D' and neighbours[3] + neighbours[4] + neighbours[5] == 0:
 			return Util.directions.Move(current_position, current_direction)
-		elif current_direction == 'L' and neighbours[6] + neighbours[7] + neighbours[0] == 0:
+		elif current_direction == 'L' and neighbours[5] + neighbours[6] + neighbours[7] == 0:
 			return Util.directions.Move(current_position, current_direction)
 	return current_position
 

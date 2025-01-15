@@ -12,12 +12,10 @@ def _parse(input_lines):
 				grid[line_num][col_num] = 1
 	return grid
 
-direction_rose = [(-1, -1), (-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1)]
-
 def _is_live(grid, position):
 	neighbours = 0
-	for direction in direction_rose:
-		neighbours += Util.directions.Get(grid, Util.directions.MoveCustom(position, direction))
+	for direction in Util.directions.DirectionsTableDiagonals:
+		neighbours += Util.directions.Get(grid, Util.directions.Move(position, direction))
 	current = Util.directions.Get(grid, position)
 	if neighbours == 3 or neighbours == 2 and current == 1:
 		return 1

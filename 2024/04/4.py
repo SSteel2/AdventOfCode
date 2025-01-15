@@ -1,17 +1,6 @@
 import Util.input
 import Util.directions
 
-DirectionsTable8 = {
-	'U': (-1, 0),
-	'UR': (-1, 1),
-	'R': (0, 1),
-	'DR': (1, 1),
-	'D': (1, 0),
-	'DL': (1, -1),
-	'L': (0, -1),
-	'UL': (-1, -1)
-}
-
 def getInput(filename):
 	return Util.input.LoadInput(Util.input.GetInputFile(__file__, filename))
 
@@ -26,10 +15,10 @@ def _find_xmas(grid, line, col):
 	if Util.directions.Get(grid, (line, col)) != 'X':
 		return 0
 	found_xmas = 8
-	for direction in DirectionsTable8:
+	for direction in Util.directions.DirectionsTableDiagonals:
 		current_location = (line, col)
 		for i in 'MAS':
-			current_location = Util.directions.MoveCustom(current_location, DirectionsTable8[direction])
+			current_location = Util.directions.Move(current_location, direction)
 			if i != Util.directions.Get(grid, current_location):
 				found_xmas -= 1
 				break
@@ -41,10 +30,10 @@ def _find_x_mas(grid, line, col):
 	center = (line, col)
 	if Util.directions.Get(grid, center) != 'A':
 		return 0
-	letter_UR = Util.directions.Get(grid, Util.directions.MoveCustom(center, DirectionsTable8['UR']))
-	letter_DR = Util.directions.Get(grid, Util.directions.MoveCustom(center, DirectionsTable8['DR']))
-	letter_UL = Util.directions.Get(grid, Util.directions.MoveCustom(center, DirectionsTable8['UL']))
-	letter_DL = Util.directions.Get(grid, Util.directions.MoveCustom(center, DirectionsTable8['DL']))
+	letter_UR = Util.directions.Get(grid, Util.directions.Move(center, 'UR'))
+	letter_DR = Util.directions.Get(grid, Util.directions.Move(center, 'DR'))
+	letter_UL = Util.directions.Get(grid, Util.directions.Move(center, 'UL'))
+	letter_DL = Util.directions.Get(grid, Util.directions.Move(center, 'DL'))
 	if letter_UR in MAS_Inverse and letter_DL in MAS_Inverse and letter_UR == MAS_Inverse[letter_DL]:
 		if letter_DR in MAS_Inverse and letter_UL in MAS_Inverse and letter_DR == MAS_Inverse[letter_UL]:
 			return 1

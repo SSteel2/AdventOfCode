@@ -5,6 +5,17 @@ DirectionsTable = {
 	'L': (0, -1)
 }
 
+DirectionsTableDiagonals = {
+	'U': (-1, 0),
+	'UR': (-1, 1),
+	'R': (0, 1),
+	'DR': (1, 1),
+	'D': (1, 0),
+	'DL': (1, -1),
+	'L': (0, -1),
+	'UL': (-1, -1)
+}
+
 InverseDirectionsTable = {
 	'U': 'D',
 	'R': 'L',
@@ -18,7 +29,7 @@ ClockwiseRotations = ['U', 'R', 'D', 'L']
 # tuple(map(sum, zip(position, DirectionsTable[direction])))
 
 def Move(position, direction):
-	return (position[0] + DirectionsTable[direction][0], position[1] + DirectionsTable[direction][1])
+	return (position[0] + DirectionsTableDiagonals[direction][0], position[1] + DirectionsTableDiagonals[direction][1])
 
 def MoveMultiple(position, direction, count):
 	return tuple(map(sum, zip(position, tuple(i * count for i in DirectionsTable[direction]))))
