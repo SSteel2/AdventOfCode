@@ -25,7 +25,7 @@ def GetValidDistance(position, path, distances):
 	if dist == -1:
 		return dist
 	for i in dist:
-		if i[1][0] == path[-1] or i[1][0] == Util.directions.InverseDirectionsTable[path[-1]]:
+		if i[1][0] == path[-1] or i[1][0] == Util.directions.Inverse(path[-1]):
 			return i[0]
 	return -1
 
@@ -36,7 +36,7 @@ def StoreValidDistance(position, path, distance, distances):
 		return
 	index = -1
 	for i, val in enumerate(dist):
-		if val[1][0] == path[-1] or val[1][0] == Util.directions.InverseDirectionsTable[path[-1]]:
+		if val[1][0] == path[-1] or val[1][0] == Util.directions.Inverse(path[-1]):
 			index = i
 			break
 	if index == -1:
@@ -56,7 +56,7 @@ def DjikstraDistances(visit_queue, possible_paths, heat_map, distances):
 		if stored_distance == -1 or stored_distance > new_distance:
 			StoreValidDistance(current, path, new_distance, distances)
 			for possible_path in possible_paths:
-				if possible_path[0] == path[0] or possible_path[0] == Util.directions.InverseDirectionsTable[path[0]]:
+				if possible_path[0] == path[0] or possible_path[0] == Util.directions.Inverse(path[0]):
 					continue
 				if IsValidPosition(Move(current, possible_path), heat_map):
 					visit_queue.append(new_distance, (current[0], current[1], possible_path, new_distance))	

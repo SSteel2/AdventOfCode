@@ -1,6 +1,7 @@
 import collections
 import Util.input
 import Util.directions
+import Util.Graph
 
 def getInput(filename):
 	return Util.input.LoadInput(Util.input.GetInputFile(__file__, filename))
@@ -123,60 +124,35 @@ def _constructEdges(start, input_lines):
 		edges.append({'start': start, 'length': current_length, 'end': current}) # check for same end
 	return edges
 
-def _getEdge(graph, start, end):
-	for edge in graph:
-		if edge['start'] == start and edge['end'] == end:
-			return edge
-	return None
-
 def _constructPathGraph(start, input_lines):
-	graph = []
-	visited_nodes = [start]
+	graph = Util.Graph.Graph()
+	visited_nodes = set()
 	queue = collections.deque()
 	queue.appendleft(start)
-	count = 100
-	while len(queue) > 0 and count > 0:
-		count -= 1
+	while len(queue) > 0:
 		local_start = queue.pop()
+		if local_start in visited_nodes:
+			continue
+		visited_nodes.add(local_start)
 		edges = _constructEdges(local_start, input_lines)
-		visited_nodes.append(local_start)
 		for i in edges:
-			inverse_edge = _getEdge(graph, i['end'], i['start'])
-			if inverse_edge == None:
-				graph.append(i)
-			else:
-				if inverse_edge['length'] < i['length']:
-					inverse_edge['length'] = i['length']
-			if i['end'] not in visited_nodes and i['end'] not in queue:
-				queue.appendleft(i['end'])
+			left = graph.AddNode(i['start'])
+			right = graph.AddNode(i['end'])
+			if right.name not in left.edges:
+				graph.AddEdge(left, right, i['length'])
+			queue.appendleft(i['end'])
 	return graph
-
-def _getEdges(graph, node):
-	edges = []
-	for edge in graph:
-		if edge['start'] == node or edge['end'] == node:
-			edges.append(edge)
-	return edges
-
-def _otherEnd(edge, node):
-	if node == edge['start']:
-		return edge['end']
-	elif node == edge['end']:
-		return edge['start']
-	else:
-		print("very very bad")
 
 def _backtracking(graph, start, length, visited, global_end):
 	if start == global_end:
 		return length
 
-	visited_nodes = [start] + visited
-	edges = _getEdges(graph, start)
+	visited_nodes = visited.union({start})
+	edges = graph.nodes[start].edges
 	max_length = 0
-	for edge in edges:
-		end = _otherEnd(edge, start)
+	for end in edges:
 		if end not in visited_nodes:
-			l = _backtracking(graph, end, length + edge['length'], visited_nodes, global_end)
+			l = _backtracking(graph, end, length + edges[end].weight, visited_nodes, global_end)
 			if l > max_length:
 				max_length = l
 	return max_length
@@ -184,5 +160,4 @@ def _backtracking(graph, start, length, visited, global_end):
 def gold(input_lines):
 	global_start, global_end = _getBoundaryLocations(input_lines)
 	graph = _constructPathGraph(global_start, input_lines)
-	result = _backtracking(graph, global_start, 0, [], global_end)
-	return result
+	return _backtracking(graph, global_start, 0, set(), global_end)
