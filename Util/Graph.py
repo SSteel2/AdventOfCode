@@ -28,3 +28,11 @@ class Edge:
 		self.left = left
 		self.right = right
 		self.weight = weight
+
+	def Other(self, node):
+		if node == self.left:
+			return self.right
+		elif node == self.right:
+			return self.left
+		else:
+			return None  # shouldn't happen
