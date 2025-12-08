@@ -122,38 +122,12 @@ def gold(input_lines):
 				min_distance = distance
 				min_index = index
 		min_distances.append((min_distance, min_index))
-	
-	graph = Util.Graph.Graph()
-	for i in range(len(distance_table)):
-		graph.AddNode(i)
 
-	# Make 1000 connections
-	for _ in range(4710):  # determined by manual binary search
-		min_distance = math.inf
-		min_distance_index = (-1, -1)
-		for index, min_distance_info in enumerate(min_distances):
-			if min_distance_info[0] < min_distance:
-				min_distance = min_distance_info[0]
-				min_distance_index = (index, min_distance_info[1])
-		graph.AddEdge(graph.nodes[min_distance_index[0]], graph.nodes[min_distance_index[1]], min_distance)
-		distance_table[min_distance_index[0]][min_distance_index[1]] = math.inf
-		distance_table[min_distance_index[1]][min_distance_index[0]] = math.inf
-
-		# Calculate new min distances (copy pasted, because me very lazy) | TODO: refactor later this eyesore
-		min_distance = math.inf
-		min_index = -1
-		for index, distance in enumerate(distance_table[min_distance_index[0]]):
-			if distance < min_distance:
-				min_distance = distance
-				min_index = index
-		min_distances[min_distance_index[0]] = (min_distance, min_index)
-
-		min_distance = math.inf
-		min_index = -1
-		for index, distance in enumerate(distance_table[min_distance_index[1]]):
-			if distance < min_distance:
-				min_distance = distance
-				min_index = index
-		min_distances[min_distance_index[1]] = (min_distance, min_index)
-
-	return positions[min_distance_index[0]][0] * positions[min_distance_index[1]][0]
+	# Furthest distance for a node will be the last edge
+	max_distance = -1
+	max_distance_index = (-1, -1)
+	for index, min_distance_info in enumerate(min_distances):
+		if min_distance_info[0] > max_distance:
+			max_distance = min_distance_info[0]
+			max_distance_index = (index, min_distance_info[1])
+	return positions[max_distance_index[0]][0] * positions[max_distance_index[1]][0]
