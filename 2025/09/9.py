@@ -9,9 +9,9 @@ def _parse(line):
 def silver(input_lines):
 	positions = Util.input.ParseInputLines(input_lines, _parse)
 	max_area = 0
-	for a in positions:
-		for b in positions:
-			area = (abs(a[0] - b[0]) + 1) * (abs(a[1] - b[1]) + 1)
+	for i, a in enumerate(positions):
+		for j in range(i, len(positions)):
+			area = (abs(a[0] - positions[j][0]) + 1) * (abs(a[1] - positions[j][1]) + 1)
 			if area > max_area:
 				max_area = area
 	return max_area
@@ -82,12 +82,12 @@ def _is_rectangle_in_positions(rectangle, positions):
 	top_right = (max(rectangle[0][0], rectangle[1][0]), min(rectangle[0][1], rectangle[1][1]))
 	return _is_point_in_positions_x(top_left, positions) and _is_point_in_positions_x(bottom_left, positions) and _is_point_in_positions_y(top_left, positions) and _is_point_in_positions_y(top_right, positions)
 
-
 def gold(input_lines):
 	positions = Util.input.ParseInputLines(input_lines, _parse)
 	max_area = 0
-	for a in positions:
-		for b in positions:
+	for i, a in enumerate(positions):
+		for j in range(i, len(positions)):
+			b = positions[j]
 			area = (abs(a[0] - b[0]) + 1) * (abs(a[1] - b[1]) + 1)
 			if area > max_area:
 				if _is_positions_in_rectangle((a, b), positions) and _is_rectangle_in_positions((a, b), positions):
