@@ -37,10 +37,6 @@ def silver(input_lines):
 		total_result += min_presses
 	return total_result
 
-def _debug_equation_print(equations, joltages):
-	for i in range(len(joltages)):
-		print(equations[i])
-
 def _subtract(matrix, line_a, line_b, multiplier):
 	for i in range(len(matrix[line_a])):
 		matrix[line_b][i] = matrix[line_b][i] - matrix[line_a][i] * multiplier
@@ -54,7 +50,6 @@ def _divide(matrix, line, divisor):
 		matrix[line][i] //= divisor
 
 def _makeZero(matrix, line_int, line_zero, col):
-	# print("makeZero", line_int, line_zero, col)
 	if matrix[line_zero][col] % matrix[line_int][col] == 0:
 		_subtract(matrix, line_int, line_zero, matrix[line_zero][col] // matrix[line_int][col])
 	else:
@@ -94,15 +89,47 @@ def _is_solved(matrix):
 				return False
 	return all(i in [0, 1] for i in lines) and all(i in [0, 1] for i in columns)
 
-# dabartine problema: kas nutinka, jei nei6eina pasirinkti keyline, nes yra 2 pilni ne=inomieji
-def _find_best_solution(equations, current_solution):
-	# debug
-	print('_find_best_solution', current_solution)
-	# pprint.pprint(equations)
+def _calculate_solution(equations, solution):
+	# go through all lines and fill in the empty solution spots if they can be determined without guessing
+	# returns None, if solution is wrong
+	is_changed = True
+	while is_changed:
+		is_changed = False
+		for index, equation in enumerate(equations):
+			# Check if line only has a single unknown
+			remainder = equation[-1]
+			unknown_col_index = -1
+			for i, col in enumerate(equation[:-1]):
+				if col == 0:
+					continue
+				elif solution[i] != None:
+					remainder -= col * solution[i]
+				elif unknown_col_index == -1:
+					unknown_col_index = i
+				else:
+					unknown_col_index = -2
+			# No unknowns
+			if unknown_col_index == -1:
+				if remainder == 0:
+				  	# move on to next equation, this doesnt provide additional information and everything is correct
+					continue
+				else:
+					return None
+			# Multiple unknowns
+			elif unknown_col_index == -2:
+				continue
+			else:
+				if remainder % equations[index][unknown_col_index] != 0:
+					return None
+				solution[unknown_col_index] = remainder // equations[index][unknown_col_index]
+				if solution[unknown_col_index] < 0:
+					return None
+				is_changed = True
+	return solution
 
-	# find line with 2 non-zero positive integers (last one doesn't count)
-	print('looking for keyline')
-	key_line = -1
+def _find_best_solution(equations, current_solution):
+	# find line with 2 non-zero positive integers (last one doesn't count) for prefered way of solving
+	column_candidates = {}
 	for index, line in enumerate(equations):
 		count = 0
 		for i, col in enumerate(line[:-1]):
@@ -113,107 +140,54 @@ def _find_best_solution(equations, current_solution):
 			elif col < 0:
 				count = -1
 				break
-		if count == 2:
+		column_candidates[index] = count
+	key_line = -1
+	min_unknowns = math.inf
+	for index in column_candidates:
+		if column_candidates[index] >= 2 and column_candidates[index] < min_unknowns:
+			min_unknowns = column_candidates[index]
 			key_line = index
-			break
+	# if nothing preferable is found, pick first one
 	if key_line == -1:
-		print('Cannot find key_line. TODO Figure out solution')
-		return None
-	print('keyline found', key_line)
+		column = -1
+		for i, val in enumerate(current_solution):
+			if val == None:
+				column = i
+				break
+		for i, equation in enumerate(equations):
+			if equation[column] != 0:
+				key_line = i
+				break
 
 	# this line will be iterated through all possible solutions while remaining lines should be calculated
 	first_non_zero_index = -1
-	second_non_zero_index = -1
 	for i in range(len(equations[key_line])):
 		if equations[key_line][i] != 0:
-			if first_non_zero_index == -1:
+			if first_non_zero_index == -1 and (i >= len(current_solution) or current_solution[i] == None):
 				first_non_zero_index = i
-			elif second_non_zero_index == -1:
-				second_non_zero_index = i
 				break
-	print('non zero indexes', first_non_zero_index, second_non_zero_index)
 
 	min_button_presses = math.inf
 	best_solution = None
 	# Determine max iteration range
-	# print('#debug: key line', key_line)
 	remainder = equations[key_line][-1]
 	for i, col in enumerate(equations[key_line][:-1]):
 		if current_solution[i] != None and col != 0:
 			remainder -= col * current_solution[i]
 	first_param_max = remainder // equations[key_line][first_non_zero_index]
-	print('first_param_max', first_param_max, current_solution)
 	for first_param_solution in range(first_param_max + 1):
-		print('key_line', key_line, 'first_non_zero_index', first_non_zero_index, 'first_param_solution', first_param_solution)
 		solution = [i for i in current_solution]
 		solution[first_non_zero_index] = first_param_solution
-		remainder = equations[key_line][-1]
-		for i, col in enumerate(equations[key_line][:-1]):
-			if solution[i] != None and col != 0:
-				remainder -= col * solution[i]
-		if remainder % equations[key_line][second_non_zero_index] != 0:
-			continue  # invalid parameter combination
-		solution[second_non_zero_index] = remainder // equations[key_line][second_non_zero_index]
-		if solution[second_non_zero_index] < 0:
-			print('huh')
-			# solution is wrong, retry at next first_param_solution
+		solution = _calculate_solution(equations, solution)
+		if solution == None:
 			continue
 
-		# Starting parameters are set up, now we need to find the rest of the solution
-		is_correct = True
-		# print('Starting parameters solution:', solution)
-		for index, equation in enumerate(equations):
-			if index == key_line:
-				continue
-			# there should be 1 unknown per equation left (TODO if there are more)
-			remainder = equation[-1]
-			unknown_col_index = -1
-			# print('Going through each equation. Index', index)
-			for i, col in enumerate(equation[:-1]):
-				if col == 0:
-					continue
-				elif solution[i] != None:
-					remainder -= col * solution[i]
-				elif unknown_col_index == -1:
-					unknown_col_index = i
-				else:
-					# Multiple unknowns in this equation, move on to next one
-					unknown_col_index = -2
-
-			if unknown_col_index == -1:
-				if remainder == 0:
-				  	# move on to next equation, this doesnt provide additional information and everything is correct
-					continue
-				else:
-					# solution is wrong, retry at next first_param_solution
-					is_correct = False
-					break
-			elif unknown_col_index == -2:
-				continue
-			else:
-				if remainder % equations[index][unknown_col_index] != 0:
-					# solution is wrong, retry at next first_param_solution
-					is_correct = False
-					break
-				solution[unknown_col_index] = remainder // equations[index][unknown_col_index]
-				if solution[unknown_col_index] < 0:
-					# solution is wrong, retry at next first_param_solution
-					is_correct = False
-					break
-		if not is_correct:
-			continue
-
-		# Go deeper if there are holes in the solution
+		# Go deeper (recursively) if there are holes in the solution
 		if any(i == None for i in solution):
 			full_solution = _find_best_solution(equations, solution)
 			if full_solution == None:
 				continue
 			solution = full_solution
-			# print('Sanity check failed, something wrong')
-			# print('current solution:', solution)
-			# print('Equations:')
-			# pprint.pprint(equations)
-			# return None
 
 		# Calculate button presses
 		button_presses = sum(solution)
@@ -221,23 +195,13 @@ def _find_best_solution(equations, current_solution):
 			min_button_presses = button_presses
 			best_solution = solution
 
-	print('best solution:', best_solution)
 	return best_solution
 
 def gold(input_lines):
 	problems = Util.input.ParseInputLines(input_lines, _parse)
 	total_result = 0
-	solved_count = 0
-	for index, problem in enumerate(problems):  # debug enumerate
+	for problem in problems:
 		_, buttons, joltages = problem
-		# f = Util.Frequency.Frequency()
-		# for button in buttons:
-		# 	for i in button:
-		# 		f.add(i)
-		# print(joltage)
-		# print(buttons)
-		# print(f)
-		# print(f'{index}: {len(joltage) - len(buttons)} {len(joltage)}, {len(buttons)}')
 		equations = [[0 for _ in range(len(buttons) + 1)] for _ in range(len(joltages))]
 		# each button corresponds to number of times a point is added, so a single number corresponds to a equation
 		for button_index, button in enumerate(buttons):
@@ -245,9 +209,6 @@ def gold(input_lines):
 				equations[light][button_index] = 1
 		for i, joltage in enumerate(joltages):
 			equations[i][-1] = joltage
-		# pprint.pprint(equations)
-		# print('-------------------------------------------')
-		# _debug_equation_print(equations, joltages)
 		used_lines = set()
 		for i in range(len(buttons)):
 			non_zero_index = -1
@@ -272,22 +233,11 @@ def gold(input_lines):
 				_makeZero(equations, non_zero_index, j, i)
 
 		_simplify(equations)
-		# pprint.pprint(equations)
 
 		if _is_solved(equations):
 			for equation in equations:
 				total_result += equation[-1]
-			solved_count += 1
 		else:
-			# print('Solving _find_best_solution for', index)
-			_debug_equation_print(equations, joltages)
 			best_solution = _find_best_solution(equations, [None for _ in range(len(buttons))])
-			if best_solution == None:
-				print('--------------------------------------------------- Couldnt find answer', index)
-			else:
-				# print('Solved with _find_best_solution', index)
-				solved_count += 1
-				total_result += sum(best_solution)
-	print(solved_count)
-	# Current best with old algorithm 146/163 - 14394
+			total_result += sum(best_solution)
 	return total_result
