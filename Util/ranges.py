@@ -94,20 +94,11 @@ class Spans:
 			result.extend(rr)
 		self.spans = result
 
-	def union(self, spans):
-		all_spans = sorted(self.spans + spans.spans)
-		i = 0
-		while i < len(all_spans) - 1:
-			if all_spans[i].isIntersecting(all_spans[i + 1]):
-				all_spans = all_spans[:i] + all_spans[i].union(all_spans[i + 1]) + all_spans[i + 2:]
-			else:
-				i += 1
-		self.spans = all_spans
-		return self
-
-	# 2025-12-05 refactor later, as I don't want to check or break older fuctionality right now
-	def union_internal(self):
-		all_spans = sorted(self.spans)
+	def union(self, spans=None):
+		if spans == None:
+			all_spans = sorted(self.spans)
+		else:	
+			all_spans = sorted(self.spans + spans.spans)
 		i = 0
 		while i < len(all_spans) - 1:
 			if all_spans[i].isIntersecting(all_spans[i + 1]):
