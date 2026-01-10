@@ -1,5 +1,5 @@
 import Util.input
-import pprint
+from collections import defaultdict
 
 def getInput(filename):
 	return Util.input.LoadInput(Util.input.GetInputFile(__file__, filename))
@@ -29,25 +29,12 @@ def gold(input_lines):
 	start = _getStart(input_lines)
 	beams = {start[1]: 1}
 	for line in input_lines:
-		next_beams = {}
+		next_beams = defaultdict(int)
 		for beam in beams:
 			if line[beam] == '^':
-				if beam - 1 in next_beams:
-					next_beams[beam - 1] += beams[beam]
-				else:
-					next_beams[beam - 1] = beams[beam]
-				if beam + 1 in next_beams:
-					next_beams[beam + 1] += beams[beam]
-				else:
-					next_beams[beam + 1] = beams[beam]
+				next_beams[beam - 1] += beams[beam]
+				next_beams[beam + 1] += beams[beam]
 			else:
-				if beam in next_beams:
-					next_beams[beam] += beams[beam]
-				else:
-					next_beams[beam] = beams[beam]
-		# print(next_beams.values())
+				next_beams[beam] += beams[beam]
 		beams = next_beams
-	total_count = 0
-	for beam in beams:
-		total_count += beams[beam]
-	return total_count
+	return sum(beams.values())
