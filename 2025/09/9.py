@@ -6,15 +6,18 @@ def getInput(filename):
 def _parse(line):
 	return tuple(int(i) for i in line.split(','))
 
-def silver(input_lines):
+def _solve(input_lines, predicate):
 	positions = Util.input.ParseInputLines(input_lines, _parse)
 	max_area = 0
-	for i, a in enumerate(positions):
+	for i in range(len(positions)):
 		for j in range(i, len(positions)):
-			area = (abs(a[0] - positions[j][0]) + 1) * (abs(a[1] - positions[j][1]) + 1)
-			if area > max_area:
+			area = (abs(positions[i][0] - positions[j][0]) + 1) * (abs(positions[i][1] - positions[j][1]) + 1)
+			if area > max_area and predicate((positions[i], positions[j]), positions):
 				max_area = area
 	return max_area
+
+def silver(input_lines):
+	return _solve(input_lines, lambda point, points: True)
 
 def _is_positions_in_rectangle(rectangle, positions):
 	rectangle_min_x = min(rectangle[0][0], rectangle[1][0])
@@ -26,49 +29,28 @@ def _is_positions_in_rectangle(rectangle, positions):
 			return False
 	return True
 
-def _is_point_in_positions_x(point, positions):
+def _is_point_in_positions(point, positions, coordinate):
 	# calculating winding number by assuming a line in x+ axis
-	if positions[0][0] == positions[1][0]:
+	# coordinate is either 0 - x or 1 - y
+	opposite_coordinate = (coordinate + 1) % 2
+	if positions[0][coordinate] == positions[1][coordinate]:
 		paired_range = range(0, len(positions), 2)
 	else:
 		paired_range = range(-1, len(positions) - 1, 2)
 	border_reached = False
 	winding_number = 0
 	for i in paired_range:
-		if positions[i][0] <= point[0]:
+		if positions[i][coordinate] <= point[coordinate]:
 			continue
-		elif positions[i][1] > point[1] and positions[i + 1][1] < point[1]:
+		elif positions[i][opposite_coordinate] > point[opposite_coordinate] and positions[i + 1][opposite_coordinate] < point[opposite_coordinate]:
 			winding_number += 2
-		elif positions[i][1] < point[1] and positions[i + 1][1] > point[1]:
+		elif positions[i][opposite_coordinate] < point[opposite_coordinate] and positions[i + 1][opposite_coordinate] > point[opposite_coordinate]:
 			winding_number -= 2
-		elif positions[i][1] > point[1] and positions[i + 1][1] == point[1] or positions[i][1] == point[1] and positions[i + 1][1] < point[1]:
+		elif positions[i][opposite_coordinate] > point[opposite_coordinate] and positions[i + 1][opposite_coordinate] == point[opposite_coordinate] \
+				or positions[i][opposite_coordinate] == point[opposite_coordinate] and positions[i + 1][opposite_coordinate] < point[opposite_coordinate]:
 			winding_number += 1
-		elif positions[i][1] < point[1] and positions[i + 1][1] == point[1] or positions[i][1] == point[1] and positions[i + 1][1] > point[1]:
-			winding_number -= 1
-		if winding_number == 2 or winding_number == -2:
-			border_reached = True
-		elif winding_number == 0 and border_reached:
-			return False
-	return winding_number != 0
-
-def _is_point_in_positions_y(point, positions):
-	# calculating winding number by assuming a line in y+ axis
-	if positions[0][1] == positions[1][1]:
-		paired_range = range(0, len(positions), 2)
-	else:
-		paired_range = range(-1, len(positions) - 1, 2)
-	border_reached = False
-	winding_number = 0
-	for i in paired_range:
-		if positions[i][1] <= point[1]:
-			continue
-		elif positions[i][0] > point[0] and positions[i + 1][0] < point[0]:
-			winding_number += 2
-		elif positions[i][0] < point[0] and positions[i + 1][0] > point[0]:
-			winding_number -= 2
-		elif positions[i][0] > point[0] and positions[i + 1][0] == point[0] or positions[i][0] == point[0] and positions[i + 1][0] < point[0]:
-			winding_number += 1
-		elif positions[i][1] < point[1] and positions[i + 1][0] == point[0] or positions[i][0] == point[0] and positions[i + 1][0] > point[0]:
+		elif positions[i][opposite_coordinate] < point[opposite_coordinate] and positions[i + 1][opposite_coordinate] == point[opposite_coordinate] \
+				or positions[i][opposite_coordinate] == point[opposite_coordinate] and positions[i + 1][opposite_coordinate] > point[opposite_coordinate]:
 			winding_number -= 1
 		if winding_number == 2 or winding_number == -2:
 			border_reached = True
@@ -80,16 +62,8 @@ def _is_rectangle_in_positions(rectangle, positions):
 	top_left = (min(rectangle[0][0], rectangle[1][0]), min(rectangle[0][1], rectangle[1][1]))
 	bottom_left = (min(rectangle[0][0], rectangle[1][0]), max(rectangle[0][1], rectangle[1][1]))
 	top_right = (max(rectangle[0][0], rectangle[1][0]), min(rectangle[0][1], rectangle[1][1]))
-	return _is_point_in_positions_x(top_left, positions) and _is_point_in_positions_x(bottom_left, positions) and _is_point_in_positions_y(top_left, positions) and _is_point_in_positions_y(top_right, positions)
+	return _is_point_in_positions(top_left, positions, 0) and _is_point_in_positions(bottom_left, positions, 0) \
+		and _is_point_in_positions(top_left, positions, 1) and _is_point_in_positions(top_right, positions, 1)
 
 def gold(input_lines):
-	positions = Util.input.ParseInputLines(input_lines, _parse)
-	max_area = 0
-	for i, a in enumerate(positions):
-		for j in range(i, len(positions)):
-			b = positions[j]
-			area = (abs(a[0] - b[0]) + 1) * (abs(a[1] - b[1]) + 1)
-			if area > max_area:
-				if _is_positions_in_rectangle((a, b), positions) and _is_rectangle_in_positions((a, b), positions):
-					max_area = area
-	return max_area
+	return _solve(input_lines, lambda point, points: _is_positions_in_rectangle(point, points) and _is_rectangle_in_positions(point, points))
